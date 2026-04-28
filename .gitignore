@@ -1,0 +1,25 @@
+# NetBeans project files
+nbproject/private/
+nbproject/private/nbactions.xml
+nbproject/private/config.properties
+build/
+dist/
+nbbuild/
+nbdist/
+.nb-gradle/
+
+# General build/dependency files
+target/
+.gradle/
+.settings/
+.classpath
+.project
+
+# PostgreSQL/Database local configurations
+*.env
+*.properties.local
+*.log
+
+# OS specific files
+.DS_Store
+Thumbs.db
