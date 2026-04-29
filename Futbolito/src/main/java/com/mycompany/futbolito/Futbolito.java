@@ -1,16 +1,12 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- */
-
 package com.mycompany.futbolito;
 
-/**
- *
- * @author emmlo
- */
+import com.mycompany.futbolito.vistas.VistaParticipante;
+
 public class Futbolito {
 
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        VistaParticipante vp = new VistaParticipante();
+        vp.setLocationRelativeTo(null); // Para que salga centrada
+        vp.setVisible(true);
     }
 }

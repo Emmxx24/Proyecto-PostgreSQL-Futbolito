@@ -1,4 +1,4 @@
-package com.mycompany.futbolito;
+package com.mycompany.futbolito.conexion;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
