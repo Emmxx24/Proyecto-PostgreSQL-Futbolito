@@ -14,10 +14,12 @@
             <version>42.7.7</version>
             <scope>compile</scope>
         </dependency>
+        <!-- Source: https://mvnrepository.com/artifact/com.toedter/jcalendar -->
         <dependency>
             <groupId>com.toedter</groupId>
             <artifactId>jcalendar</artifactId>
             <version>1.4</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
     
