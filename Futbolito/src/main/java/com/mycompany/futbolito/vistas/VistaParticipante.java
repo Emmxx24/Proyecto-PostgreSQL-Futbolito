@@ -16,13 +16,6 @@ public class VistaParticipante extends javax.swing.JInternalFrame {
     public VistaParticipante() {
         initComponents();
         
-        // Agregamos el evento del clic a la tabla manualmente
-        tablaParticipantes.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                tablaParticipantesMouseClicked(evt);
-            }
-        });
-
         // Cargamos los datos iniciales
         cargarTabla();
         limpiarCampos();
@@ -100,11 +93,21 @@ public class VistaParticipante extends javax.swing.JInternalFrame {
         jLabel1.setText("Nombre:");
 
         txtNombre.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        txtNombre.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtNombreKeyTyped(evt);
+            }
+        });
 
         jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel2.setText("Correo electrónico:");
 
         txtCorreo.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        txtCorreo.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtCorreoKeyTyped(evt);
+            }
+        });
 
         jLabel3.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel3.setText("Género:");
@@ -116,6 +119,11 @@ public class VistaParticipante extends javax.swing.JInternalFrame {
         jLabel4.setText("Teléfono:");
 
         txtNumero.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        txtNumero.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtNumeroKeyTyped(evt);
+            }
+        });
 
         jLabel5.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel5.setText("Fecha de nacimiento:");
@@ -309,7 +317,7 @@ public class VistaParticipante extends javax.swing.JInternalFrame {
         try {
             ParticipanteDAO dao = new ParticipanteDAO();
             dao.insertarParticipante(p);
-            JOptionPane.showMessageDialog(this, "Participante agregado exitosamente.");
+            //JOptionPane.showMessageDialog(this, "Participante agregado exitosamente.");
             cargarTabla();
             limpiarCampos();
         } catch (Exception ex) {
@@ -333,6 +341,14 @@ public class VistaParticipante extends javax.swing.JInternalFrame {
             JOptionPane.showMessageDialog(this, "Por favor complete todos los campos.", "Atención", JOptionPane.WARNING_MESSAGE);
             return;
         }
+        if (telefono.length() < 10) {
+            JOptionPane.showMessageDialog(this, "Ingrese un número de teléfono válido (mínimo 10 dígitos).", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (!correo.contains("@") || !correo.contains(".")) {
+            JOptionPane.showMessageDialog(this, "Ingrese un correo electrónico válido.", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
         Participante p = new Participante();
         p.setIdParticipante(idParticipanteSeleccionado);
@@ -345,7 +361,7 @@ public class VistaParticipante extends javax.swing.JInternalFrame {
         try {
             ParticipanteDAO dao = new ParticipanteDAO();
             dao.modificarParticipante(p);
-            JOptionPane.showMessageDialog(this, "Participante modificado exitosamente.");
+            //JOptionPane.showMessageDialog(this, "Participante modificado exitosamente.");
             cargarTabla();
             limpiarCampos();
         } catch (Exception ex) {
@@ -360,8 +376,8 @@ public class VistaParticipante extends javax.swing.JInternalFrame {
         }
 
         // Una confirmación nunca está de más antes de borrar
-        int respuesta = JOptionPane.showConfirmDialog(this, "¿Estás seguro de que quieres eliminar este participante?", "Confirmar", JOptionPane.YES_NO_OPTION);
-        if (respuesta == JOptionPane.YES_OPTION) {
+        //int respuesta = JOptionPane.showConfirmDialog(this, "¿Estás seguro de que quieres eliminar este participante?", "Confirmar", JOptionPane.YES_NO_OPTION);
+        //if (respuesta == JOptionPane.YES_OPTION) {
             try {
                 ParticipanteDAO dao = new ParticipanteDAO();
                 dao.eliminarParticipante(idParticipanteSeleccionado);
@@ -371,7 +387,7 @@ public class VistaParticipante extends javax.swing.JInternalFrame {
             } catch (Exception ex) {
                 ManejadorErroresBD.mostrarErrorAmigable(ex);
             }
-        }
+        //}
     }//GEN-LAST:event_btnEliminarActionPerformed
 
     private void tablaParticipantesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaParticipantesMouseClicked
@@ -399,38 +415,30 @@ public class VistaParticipante extends javax.swing.JInternalFrame {
         if (idParticipanteSeleccionado != -1) {
             try {
                 ParticipanteDAO dao = new ParticipanteDAO();
-                
-                // Verificamos si ya es Jugador (1) o Arbitro (2)
                 boolean esJugador = dao.yaEstaRegistradoComo(idParticipanteSeleccionado, 1);
                 boolean esArbitro = dao.yaEstaRegistradoComo(idParticipanteSeleccionado, 2);
 
-                if (esArbitro) {
-                    JOptionPane.showMessageDialog(this, "Este participante ya está registrado como Árbitro.", "Atención", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-                if (esJugador) {
-                    JOptionPane.showMessageDialog(this, "Este participante ya está registrado como Jugador.", "Atención", JOptionPane.WARNING_MESSAGE);
+                if (esArbitro || esJugador) {
+                    JOptionPane.showMessageDialog(this, "Este participante ya está registrado como Jugador o Árbitro.", "Atención", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
-                // Instanciamos la vista de Jugador pasándole el ID
+                // 1. Instancias la vista de Jugador con el ID
                 VistaJugador ventanaJugador = new VistaJugador(idParticipanteSeleccionado);
-                this.getDesktopPane().add(ventanaJugador);
                 
-                // Desactivamos VistaParticipante para simular un ShowDialog()
-                this.setEnabled(false);
+                // 2. Extraes el escritorio padre
+                javax.swing.JDesktopPane escritorio = this.getDesktopPane();
                 
-                // Le decimos a VistaJugador que nos vuelva a activar cuando se cierre
-                ventanaJugador.addInternalFrameListener(new javax.swing.event.InternalFrameAdapter() {
-                    @Override
-                    public void internalFrameClosed(javax.swing.event.InternalFrameEvent e) {
-                        setEnabled(true);
-                        toFront(); // Trae a VistaParticipante al frente de nuevo
-                    }
-                });
-
+                // 3. Limpias el escritorio (destruye VistaParticipante)
+                escritorio.removeAll();
+                escritorio.repaint();
+                
+                // 4. Agregas la de Jugador y la maximizas
+                escritorio.add(ventanaJugador);
                 ventanaJugador.setVisible(true);
-                ventanaJugador.toFront();
+                try {
+                    ventanaJugador.setMaximum(true);
+                } catch (Exception e) { }
 
             } catch (Exception ex) {
                 ManejadorErroresBD.mostrarErrorAmigable(ex);
@@ -448,30 +456,23 @@ public class VistaParticipante extends javax.swing.JInternalFrame {
                 boolean esJugador = dao.yaEstaRegistradoComo(idParticipanteSeleccionado, 1);
                 boolean esArbitro = dao.yaEstaRegistradoComo(idParticipanteSeleccionado, 2);
 
-                if (esArbitro) {
-                    JOptionPane.showMessageDialog(this, "Este participante ya está registrado como Árbitro.", "Atención", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-                if (esJugador) {
-                    JOptionPane.showMessageDialog(this, "Este participante ya está registrado como Jugador.", "Atención", JOptionPane.WARNING_MESSAGE);
+                if (esArbitro || esJugador) {
+                    JOptionPane.showMessageDialog(this, "Este participante ya está registrado como Jugador o Árbitro.", "Atención", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
                 VistaArbitro ventanaArbitro = new VistaArbitro(idParticipanteSeleccionado);
-                this.getDesktopPane().add(ventanaArbitro);
                 
-                this.setEnabled(false);
+                javax.swing.JDesktopPane escritorio = this.getDesktopPane();
                 
-                ventanaArbitro.addInternalFrameListener(new javax.swing.event.InternalFrameAdapter() {
-                    @Override
-                    public void internalFrameClosed(javax.swing.event.InternalFrameEvent e) {
-                        setEnabled(true);
-                        toFront();
-                    }
-                });
-
+                escritorio.removeAll();
+                escritorio.repaint();
+                
+                escritorio.add(ventanaArbitro);
                 ventanaArbitro.setVisible(true);
-                ventanaArbitro.toFront();
+                try {
+                    ventanaArbitro.setMaximum(true);
+                } catch (Exception e) { }
 
             } catch (Exception ex) {
                 ManejadorErroresBD.mostrarErrorAmigable(ex);
@@ -480,6 +481,41 @@ public class VistaParticipante extends javax.swing.JInternalFrame {
             JOptionPane.showMessageDialog(this, "Selecciona un Participante de la tabla primero.");
         }
     }//GEN-LAST:event_btnRegArbActionPerformed
+
+    private void txtNombreKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtNombreKeyTyped
+        char c = evt.getKeyChar();
+    
+        // 1. Validar que solo sean letras
+        if (Character.isDigit(c)) {
+            evt.consume(); // Destruye la tecla presionada (no se escribe)
+        }
+
+        // 2. Validar el límite de texto
+        if (txtNombre.getText().length() >= 50) {
+            evt.consume(); // Si ya hay 50 caracteres, ya no deja escribir más
+        }
+    }//GEN-LAST:event_txtNombreKeyTyped
+
+    private void txtNumeroKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtNumeroKeyTyped
+        char c = evt.getKeyChar();
+    
+        // 1. Validar que solo sean números
+        if (!Character.isDigit(c)) {
+            evt.consume(); // Destruye la tecla presionada (no se escribe)
+        }
+
+        // 2. Validar el límite de texto (ejemplo: máximo 10 dígitos para el teléfono)
+        if (txtNumero.getText().length() >= 10) {
+            evt.consume(); // Si ya hay 10 caracteres, ya no deja escribir más
+        }
+    }//GEN-LAST:event_txtNumeroKeyTyped
+
+    private void txtCorreoKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCorreoKeyTyped
+        char c = evt.getKeyChar();
+        if (txtCorreo.getText().length() >= 50) {
+            evt.consume();
+        }
+    }//GEN-LAST:event_txtCorreoKeyTyped
 
     
 

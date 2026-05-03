@@ -4,6 +4,12 @@
  */
 package com.mycompany.futbolito.vistas;
 
+import com.mycompany.futbolito.dao.JugadorDAO;
+import com.mycompany.futbolito.modelos.Jugador;
+import com.mycompany.futbolito.utilidades.ManejadorErroresBD;
+import javax.swing.JOptionPane;
+import com.mycompany.futbolito.utilidades.UtilidadesVista;
+
 /**
  *
  * @author Usuario
@@ -13,12 +19,69 @@ public class VistaJugador extends javax.swing.JInternalFrame {
     /**
      * Creates new form VistaJugador
      */
+    private long idJugadorSeleccionado = -1;
+    private long idParticipanteHeredado = -1; // Tu idJugadorFK de C#
+
+    // CONSTRUCTOR 1: Desde el menú (Sin ID)
     public VistaJugador() {
-        initComponents();
+        this(-1); // Llama al constructor de abajo mandándole un -1
     }
-    
+
+    // CONSTRUCTOR 2: Desde VistaParticipante (Con ID)
     public VistaJugador(long id){
         initComponents();
+        this.idParticipanteHeredado = id;
+        
+        cargarTabla();
+        limpiarCampos();
+        
+        // Lógica de habilitar botón dependiendo de dónde se abrió
+        if (idParticipanteHeredado != -1) {
+            btnAgregar.setEnabled(true);
+            cargarNombreForaneo(idParticipanteHeredado);
+        }/* else {
+            btnAgregar.setEnabled(false); // Desde el menú no se puede agregar
+        }*/
+    }
+
+    private void cargarNombreForaneo(long id) {
+        try {
+            JugadorDAO dao = new JugadorDAO();
+            String nombre = dao.obtenerNombreParticipante(id);
+            txtParticipante.setText(nombre); // Aquí ya va a salir con todo y edad
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }
+
+    private void cargarTabla() {
+        try {
+            JugadorDAO dao = new JugadorDAO();
+            tablaJugadores.setModel(dao.obtenerModeloJugadores());
+            
+            // ¡Aquí está tu función de autoajustar columnas!
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaJugadores);
+            
+            // TRUCO: Ocultar la columna "IdParticipante" (Índice 0) para que no se vea
+            tablaJugadores.getColumnModel().getColumn(0).setMinWidth(0);
+            tablaJugadores.getColumnModel().getColumn(0).setMaxWidth(0);
+            tablaJugadores.getColumnModel().getColumn(0).setWidth(0);
+            
+            tablaJugadores.getTableHeader().setReorderingAllowed(false);
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }
+
+    private void limpiarCampos() {
+        cbPosicion.setSelectedIndex(0);
+        cbTipoSangre.setSelectedIndex(0);
+        spinNumero.setValue(0);
+        idJugadorSeleccionado = -1;
+        
+        if (idParticipanteHeredado == -1) {
+            txtParticipante.setText("");
+        }
     }
 
     /**
@@ -73,12 +136,54 @@ public class VistaJugador extends javax.swing.JInternalFrame {
 
         btnAgregar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnAgregar.setText("Agregar");
+        btnAgregar.addActionListener(this::btnAgregarActionPerformed);
 
         btnModificar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnModificar.setText("Modificar");
+        btnModificar.addActionListener(this::btnModificarActionPerformed);
 
         btnEliminar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnEliminar.setText("Eliminar");
+        btnEliminar.addActionListener(this::btnEliminarActionPerformed);
+
+        jPanel1.setBackground(new java.awt.Color(51, 204, 0));
+
+        tablaJugadores.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        tablaJugadores.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {},
+                {},
+                {},
+                {}
+            },
+            new String [] {
+
+            }
+        ));
+        tablaJugadores.setRowHeight(30);
+        tablaJugadores.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tablaJugadoresMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(tablaJugadores);
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1)
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 442, Short.MAX_VALUE)
+                .addContainerGap())
+        );
 
         javax.swing.GroupLayout panelInputsLayout = new javax.swing.GroupLayout(panelInputs);
         panelInputs.setLayout(panelInputsLayout);
@@ -87,21 +192,26 @@ public class VistaJugador extends javax.swing.JInternalFrame {
             .addGroup(panelInputsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(panelInputsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblParticipante)
-                    .addComponent(lblPosicion)
-                    .addComponent(lblDorsal)
-                    .addComponent(lblTipoSangre)
-                    .addComponent(txtParticipante, javax.swing.GroupLayout.PREFERRED_SIZE, 330, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cbPosicion, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(panelInputsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(cbTipoSangre, javax.swing.GroupLayout.Alignment.LEADING, 0, 130, Short.MAX_VALUE)
-                        .addComponent(spinNumero, javax.swing.GroupLayout.Alignment.LEADING)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 382, Short.MAX_VALUE)
-                .addGroup(panelInputsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btnModificar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnAgregar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnEliminar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(92, 92, 92))
+                    .addGroup(panelInputsLayout.createSequentialGroup()
+                        .addGroup(panelInputsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblParticipante)
+                            .addComponent(lblPosicion)
+                            .addComponent(lblDorsal)
+                            .addComponent(lblTipoSangre)
+                            .addComponent(txtParticipante, javax.swing.GroupLayout.PREFERRED_SIZE, 330, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(cbPosicion, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(panelInputsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addComponent(cbTipoSangre, javax.swing.GroupLayout.Alignment.LEADING, 0, 130, Short.MAX_VALUE)
+                                .addComponent(spinNumero, javax.swing.GroupLayout.Alignment.LEADING)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 382, Short.MAX_VALUE)
+                        .addGroup(panelInputsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(btnModificar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnAgregar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnEliminar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(92, 92, 92))
+                    .addGroup(panelInputsLayout.createSequentialGroup()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())))
         );
         panelInputsLayout.setVerticalGroup(
             panelInputsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -131,39 +241,8 @@ public class VistaJugador extends javax.swing.JInternalFrame {
                     .addComponent(btnEliminar))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cbTipoSangre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        jPanel1.setBackground(new java.awt.Color(51, 204, 0));
-
-        tablaJugadores.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        tablaJugadores.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {},
-                {},
-                {},
-                {}
-            },
-            new String [] {
-
-            }
-        ));
-        jScrollPane1.setViewportView(tablaJugadores);
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane1)
-                .addContainerGap())
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 442, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -171,7 +250,6 @@ public class VistaJugador extends javax.swing.JInternalFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(panelInputs, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
@@ -179,12 +257,119 @@ public class VistaJugador extends javax.swing.JInternalFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(panelInputs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnAgregarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarActionPerformed
+        String posicion = cbPosicion.getSelectedItem().toString();
+        String tipoSangre = cbTipoSangre.getSelectedItem().toString();
+        int numero = (int) spinNumero.getValue(); // Casteo a int porque JSpinner devuelve un Object
+
+        if (idParticipanteHeredado == -1) {
+            JOptionPane.showMessageDialog(this, "Para agregar, debes abrir esta ventana desde Participante.");
+            return;
+        }
+        if (numero <=0 || numero > 100){
+             JOptionPane.showMessageDialog(this, "Ingresa un numero de dorsal válido (mayor a 0 y <= 100");
+             return;
+        }
+
+        Jugador j = new Jugador();
+        j.setIdParticipante(idParticipanteHeredado);
+        j.setPosicion(posicion);
+        j.setTipoSangre(tipoSangre);
+        j.setNumero(numero);
+
+        try {
+            JugadorDAO dao = new JugadorDAO();
+            dao.insertarJugador(j);
+            //JOptionPane.showMessageDialog(this, "Jugador agregado exitosamente.");
+            
+            // Reseteamos la variable para que no agregue doble por accidente
+            idParticipanteHeredado = -1;
+            //btnAgregar.setEnabled(false); 
+            
+            cargarTabla();
+            limpiarCampos();
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }//GEN-LAST:event_btnAgregarActionPerformed
+
+    private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
+        if (idJugadorSeleccionado == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un Jugador de la tabla para modificar.", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String posicion = cbPosicion.getSelectedItem().toString();
+        String tipoSangre = cbTipoSangre.getSelectedItem().toString();
+        int numero = (int) spinNumero.getValue();
+
+        if (numero <=0 || numero > 100){
+             JOptionPane.showMessageDialog(this, "Ingresa un numero de dorsal válido (mayor a 0 y <= 100");
+             return;
+        }
+        
+        Jugador j = new Jugador();
+        j.setIdJugador(idJugadorSeleccionado);
+        j.setPosicion(posicion);
+        j.setTipoSangre(tipoSangre);
+        j.setNumero(numero);
+
+        try {
+            JugadorDAO dao = new JugadorDAO();
+            dao.modificarJugador(j);
+            //JOptionPane.showMessageDialog(this, "Jugador modificado exitosamente.");
+            cargarTabla();
+            limpiarCampos();
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }//GEN-LAST:event_btnModificarActionPerformed
+
+    private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
+        if (idJugadorSeleccionado == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un Jugador para eliminar.", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        //int respuesta = JOptionPane.showConfirmDialog(this, "¿Estás seguro de que quieres eliminar a este jugador?", "Confirmar", JOptionPane.YES_NO_OPTION);
+        //if (respuesta == JOptionPane.YES_OPTION) {
+            try {
+                JugadorDAO dao = new JugadorDAO();
+                dao.eliminarJugador(idJugadorSeleccionado);
+                //JOptionPane.showMessageDialog(this, "Jugador eliminado exitosamente.");
+                cargarTabla();
+                limpiarCampos();
+            } catch (Exception ex) {
+                ManejadorErroresBD.mostrarErrorAmigable(ex);
+            }
+        //}
+    }//GEN-LAST:event_btnEliminarActionPerformed
+
+    private void tablaJugadoresMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaJugadoresMouseClicked
+        int fila = tablaJugadores.getSelectedRow();
+        if (fila >= 0) {
+            try {
+                // Columna 0 es IdParticipante (Oculta), Columna 1 es IdJugador
+                idJugadorSeleccionado = Long.parseLong(tablaJugadores.getValueAt(fila, 1).toString());
+                
+                long idParticipanteDeTabla = Long.parseLong(tablaJugadores.getValueAt(fila, 0).toString());
+                cargarNombreForaneo(idParticipanteDeTabla);
+                
+                cbPosicion.setSelectedItem(tablaJugadores.getValueAt(fila, 3).toString());
+                spinNumero.setValue(Integer.parseInt(tablaJugadores.getValueAt(fila, 4).toString()));
+                cbTipoSangre.setSelectedItem(tablaJugadores.getValueAt(fila, 5).toString());
+                
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error al cargar los datos de la tabla: " + ex.getMessage());
+            }
+        }
+    }//GEN-LAST:event_tablaJugadoresMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
