@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JInternalFrame.java to edit this template
- */
 package com.mycompany.futbolito.vistas;
 
 import com.mycompany.futbolito.dao.ParticipanteDAO;
@@ -10,16 +6,11 @@ import com.mycompany.futbolito.utilidades.ManejadorErroresBD;
 import javax.swing.JOptionPane;
 import java.util.Date;
 
-/**
- *
- * @author Usuario
- */
 public class VistaParticipante extends javax.swing.JInternalFrame {
 
     /**
      * Creates new form VistaParticipante
      */
-// Variable para saber qué wey seleccionaste de la tabla
     private long idParticipanteSeleccionado = -1;
 
     public VistaParticipante() {
@@ -42,17 +33,10 @@ public class VistaParticipante extends javax.swing.JInternalFrame {
             ParticipanteDAO dao = new ParticipanteDAO();
             tablaParticipantes.setModel(dao.obtenerModeloParticipantes());
 
-            // --- CÓDIGO NUEVO PARA EL ANCHO DE COLUMNAS ---
-            // El número es la columna (0 es ID, 1 es Nombre, etc.) y el setPreferredWidth es el tamaño en píxeles.
-            tablaParticipantes.getColumnModel().getColumn(0).setPreferredWidth(50);  // ID
-            tablaParticipantes.getColumnModel().getColumn(1).setPreferredWidth(200); // Nombre (Más ancho)
-            tablaParticipantes.getColumnModel().getColumn(2).setPreferredWidth(100); // Género
-            tablaParticipantes.getColumnModel().getColumn(3).setPreferredWidth(120); // Teléfono
-            tablaParticipantes.getColumnModel().getColumn(4).setPreferredWidth(200); // Correo
-            tablaParticipantes.getColumnModel().getColumn(5).setPreferredWidth(120); // Fecha
-            tablaParticipantes.getColumnModel().getColumn(6).setPreferredWidth(50);  // Edad
+            // \Ajusta las columnas automáticamente sin importar qué tabla sea
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaParticipantes);
 
-            // Opcional: Evitar que el usuario cambie el orden de las columnas arrastrándolas
+            // Bloqueamos que el usuario ande arrastrando y desordenando las columnas
             tablaParticipantes.getTableHeader().setReorderingAllowed(false);
 
         } catch (Exception ex) {
@@ -68,6 +52,17 @@ public class VistaParticipante extends javax.swing.JInternalFrame {
         calendario.setDate(new Date()); // Lo regresa a la fecha de hoy
         
         idParticipanteSeleccionado = -1;
+        actualizarBotones(false);
+    }
+    
+    private void actualizarBotones(boolean mostrar) {
+        // Habilita o deshabilita los clics
+        btnRegJug.setEnabled(mostrar);
+        btnRegArb.setEnabled(mostrar);
+        
+        // Oculta o muestra los botones en la pantalla
+        btnRegJug.setVisible(mostrar);
+        btnRegArb.setVisible(mostrar);
     }
 
     /**
@@ -96,6 +91,8 @@ public class VistaParticipante extends javax.swing.JInternalFrame {
         panelDatos = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tablaParticipantes = new javax.swing.JTable();
+        btnRegJug = new javax.swing.JButton();
+        btnRegArb = new javax.swing.JButton();
 
         panelInputs.setBackground(new java.awt.Color(204, 102, 0));
 
@@ -135,6 +132,66 @@ public class VistaParticipante extends javax.swing.JInternalFrame {
         btnEliminar.setText("Eliminar");
         btnEliminar.addActionListener(this::btnEliminarActionPerformed);
 
+        panelDatos.setBackground(new java.awt.Color(255, 51, 51));
+
+        tablaParticipantes.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        tablaParticipantes.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        tablaParticipantes.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {},
+                {},
+                {},
+                {}
+            },
+            new String [] {
+
+            }
+        ));
+        tablaParticipantes.setRowHeight(30);
+        tablaParticipantes.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tablaParticipantesMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(tablaParticipantes);
+
+        btnRegJug.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        btnRegJug.setText("Registrar Jugador");
+        btnRegJug.addActionListener(this::btnRegJugActionPerformed);
+
+        btnRegArb.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        btnRegArb.setText("Registrar Arbitro");
+        btnRegArb.addActionListener(this::btnRegArbActionPerformed);
+
+        javax.swing.GroupLayout panelDatosLayout = new javax.swing.GroupLayout(panelDatos);
+        panelDatos.setLayout(panelDatosLayout);
+        panelDatosLayout.setHorizontalGroup(
+            panelDatosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelDatosLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(panelDatosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(panelDatosLayout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addComponent(btnRegJug)
+                        .addGap(39, 39, 39)
+                        .addComponent(btnRegArb)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(panelDatosLayout.createSequentialGroup()
+                        .addComponent(jScrollPane1)
+                        .addContainerGap())))
+        );
+        panelDatosLayout.setVerticalGroup(
+            panelDatosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelDatosLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 470, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(panelDatosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnRegJug)
+                    .addComponent(btnRegArb))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout panelInputsLayout = new javax.swing.GroupLayout(panelInputs);
         panelInputs.setLayout(panelInputsLayout);
         panelInputsLayout.setHorizontalGroup(
@@ -157,18 +214,19 @@ public class VistaParticipante extends javax.swing.JInternalFrame {
                                 .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addComponent(txtNumero))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 157, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 18, Short.MAX_VALUE)
                 .addGroup(panelInputsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(calendario, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(panelInputsLayout.createSequentialGroup()
                         .addGap(2, 2, 2)
                         .addComponent(jLabel5)))
-                .addGap(92, 92, 92)
+                .addGap(83, 83, 83)
                 .addGroup(panelInputsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(btnModificar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnAgregar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnEliminar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(30, 30, 30))
+            .addComponent(panelDatos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         panelInputsLayout.setVerticalGroup(
             panelInputsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -199,68 +257,22 @@ public class VistaParticipante extends javax.swing.JInternalFrame {
                             .addComponent(cbGenero, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txtNumero, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(calendario, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 17, Short.MAX_VALUE))
-        );
-
-        panelDatos.setBackground(new java.awt.Color(255, 51, 51));
-
-        tablaParticipantes.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        tablaParticipantes.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        tablaParticipantes.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {},
-                {},
-                {},
-                {}
-            },
-            new String [] {
-
-            }
-        ));
-        tablaParticipantes.setRowHeight(30);
-        tablaParticipantes.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                tablaParticipantesMouseClicked(evt);
-            }
-        });
-        jScrollPane1.setViewportView(tablaParticipantes);
-
-        javax.swing.GroupLayout panelDatosLayout = new javax.swing.GroupLayout(panelDatos);
-        panelDatos.setLayout(panelDatosLayout);
-        panelDatosLayout.setHorizontalGroup(
-            panelDatosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelDatosLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane1)
-                .addContainerGap())
-        );
-        panelDatosLayout.setVerticalGroup(
-            panelDatosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelDatosLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 476, Short.MAX_VALUE)
-                .addContainerGap())
+                .addGap(18, 18, 18)
+                .addComponent(panelDatos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(panelDatos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(panelInputs, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+            .addComponent(panelInputs, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(panelInputs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(panelDatos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -375,6 +387,7 @@ public class VistaParticipante extends javax.swing.JInternalFrame {
                 // Convertimos el java.sql.Date de la tabla a java.util.Date para el JCalendar
                 java.sql.Date fechaSQL = (java.sql.Date) tablaParticipantes.getValueAt(fila, 5);
                 calendario.setDate(new java.util.Date(fechaSQL.getTime()));
+                actualizarBotones(true);
                 
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Error al cargar los datos de la tabla: " + ex.getMessage());
@@ -382,11 +395,100 @@ public class VistaParticipante extends javax.swing.JInternalFrame {
         }
     }//GEN-LAST:event_tablaParticipantesMouseClicked
 
+    private void btnRegJugActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegJugActionPerformed
+        if (idParticipanteSeleccionado != -1) {
+            try {
+                ParticipanteDAO dao = new ParticipanteDAO();
+                
+                // Verificamos si ya es Jugador (1) o Arbitro (2)
+                boolean esJugador = dao.yaEstaRegistradoComo(idParticipanteSeleccionado, 1);
+                boolean esArbitro = dao.yaEstaRegistradoComo(idParticipanteSeleccionado, 2);
+
+                if (esArbitro) {
+                    JOptionPane.showMessageDialog(this, "Este participante ya está registrado como Árbitro.", "Atención", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                if (esJugador) {
+                    JOptionPane.showMessageDialog(this, "Este participante ya está registrado como Jugador.", "Atención", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                // Instanciamos la vista de Jugador pasándole el ID
+                VistaJugador ventanaJugador = new VistaJugador(idParticipanteSeleccionado);
+                this.getDesktopPane().add(ventanaJugador);
+                
+                // Desactivamos VistaParticipante para simular un ShowDialog()
+                this.setEnabled(false);
+                
+                // Le decimos a VistaJugador que nos vuelva a activar cuando se cierre
+                ventanaJugador.addInternalFrameListener(new javax.swing.event.InternalFrameAdapter() {
+                    @Override
+                    public void internalFrameClosed(javax.swing.event.InternalFrameEvent e) {
+                        setEnabled(true);
+                        toFront(); // Trae a VistaParticipante al frente de nuevo
+                    }
+                });
+
+                ventanaJugador.setVisible(true);
+                ventanaJugador.toFront();
+
+            } catch (Exception ex) {
+                ManejadorErroresBD.mostrarErrorAmigable(ex);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Selecciona un Participante de la tabla primero.");
+        }
+    }//GEN-LAST:event_btnRegJugActionPerformed
+
+    private void btnRegArbActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegArbActionPerformed
+        if (idParticipanteSeleccionado != -1) {
+            try {
+                ParticipanteDAO dao = new ParticipanteDAO();
+                
+                boolean esJugador = dao.yaEstaRegistradoComo(idParticipanteSeleccionado, 1);
+                boolean esArbitro = dao.yaEstaRegistradoComo(idParticipanteSeleccionado, 2);
+
+                if (esArbitro) {
+                    JOptionPane.showMessageDialog(this, "Este participante ya está registrado como Árbitro.", "Atención", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                if (esJugador) {
+                    JOptionPane.showMessageDialog(this, "Este participante ya está registrado como Jugador.", "Atención", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                VistaArbitro ventanaArbitro = new VistaArbitro(idParticipanteSeleccionado);
+                this.getDesktopPane().add(ventanaArbitro);
+                
+                this.setEnabled(false);
+                
+                ventanaArbitro.addInternalFrameListener(new javax.swing.event.InternalFrameAdapter() {
+                    @Override
+                    public void internalFrameClosed(javax.swing.event.InternalFrameEvent e) {
+                        setEnabled(true);
+                        toFront();
+                    }
+                });
+
+                ventanaArbitro.setVisible(true);
+                ventanaArbitro.toFront();
+
+            } catch (Exception ex) {
+                ManejadorErroresBD.mostrarErrorAmigable(ex);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Selecciona un Participante de la tabla primero.");
+        }
+    }//GEN-LAST:event_btnRegArbActionPerformed
+
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAgregar;
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnModificar;
+    private javax.swing.JButton btnRegArb;
+    private javax.swing.JButton btnRegJug;
     private com.toedter.calendar.JCalendar calendario;
     private javax.swing.JComboBox<String> cbGenero;
     private javax.swing.JLabel jLabel1;

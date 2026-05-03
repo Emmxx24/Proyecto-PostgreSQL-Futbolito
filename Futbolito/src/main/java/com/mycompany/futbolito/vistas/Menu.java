@@ -9,7 +9,7 @@ package com.mycompany.futbolito.vistas;
  * @author Usuario
  */
 public class Menu extends javax.swing.JFrame {
-    
+
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(Menu.class.getName());
 
     /**
@@ -28,21 +28,174 @@ public class Menu extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        escritorio = new javax.swing.JDesktopPane();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        menuPersona = new javax.swing.JMenu();
+        menuParticipante = new javax.swing.JMenuItem();
+        menuJugador = new javax.swing.JMenuItem();
+        menuArbitro = new javax.swing.JMenuItem();
+        menuJuego = new javax.swing.JMenu();
+        menuTorneo = new javax.swing.JMenuItem();
+        menuJornada = new javax.swing.JMenuItem();
+        menuLugar = new javax.swing.JMenuItem();
+        menuDetalleTorneo = new javax.swing.JMenuItem();
+        menuEvento = new javax.swing.JMenu();
+        menuPartido = new javax.swing.JMenuItem();
+        menuResultadoPartido = new javax.swing.JMenuItem();
+        menuGol = new javax.swing.JMenuItem();
+        menuTarjeta = new javax.swing.JMenuItem();
+        menuClub = new javax.swing.JMenu();
+        menuEquipo = new javax.swing.JMenuItem();
+        menuDetalleEquipo = new javax.swing.JMenuItem();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        javax.swing.GroupLayout escritorioLayout = new javax.swing.GroupLayout(escritorio);
+        escritorio.setLayout(escritorioLayout);
+        escritorioLayout.setHorizontalGroup(
+            escritorioLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 1000, Short.MAX_VALUE)
+        );
+        escritorioLayout.setVerticalGroup(
+            escritorioLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 631, Short.MAX_VALUE)
+        );
+
+        menuPersona.setText("Persona");
+
+        menuParticipante.setText("Participante");
+        menuParticipante.addActionListener(this::menuParticipanteActionPerformed);
+        menuPersona.add(menuParticipante);
+
+        menuJugador.setText("Jugador");
+        menuJugador.addActionListener(this::menuJugadorActionPerformed);
+        menuPersona.add(menuJugador);
+
+        menuArbitro.setText("Árbitro");
+        menuArbitro.addActionListener(this::menuArbitroActionPerformed);
+        menuPersona.add(menuArbitro);
+
+        jMenuBar1.add(menuPersona);
+
+        menuJuego.setText("Juego");
+
+        menuTorneo.setText("Torneo");
+        menuTorneo.addActionListener(this::menuTorneoActionPerformed);
+        menuJuego.add(menuTorneo);
+
+        menuJornada.setText("Jornada");
+        menuJornada.addActionListener(this::menuJornadaActionPerformed);
+        menuJuego.add(menuJornada);
+
+        menuLugar.setText("Lugar");
+        menuLugar.addActionListener(this::menuLugarActionPerformed);
+        menuJuego.add(menuLugar);
+
+        menuDetalleTorneo.setText("DetalleTorneo");
+        menuDetalleTorneo.addActionListener(this::menuDetalleTorneoActionPerformed);
+        menuJuego.add(menuDetalleTorneo);
+
+        jMenuBar1.add(menuJuego);
+
+        menuEvento.setText("Evento");
+
+        menuPartido.setText("Partido");
+        menuPartido.addActionListener(this::menuPartidoActionPerformed);
+        menuEvento.add(menuPartido);
+
+        menuResultadoPartido.setText("ResultadoPartido");
+        menuResultadoPartido.addActionListener(this::menuResultadoPartidoActionPerformed);
+        menuEvento.add(menuResultadoPartido);
+
+        menuGol.setText("Gol");
+        menuGol.addActionListener(this::menuGolActionPerformed);
+        menuEvento.add(menuGol);
+
+        menuTarjeta.setText("Tarjeta");
+        menuTarjeta.addActionListener(this::menuTarjetaActionPerformed);
+        menuEvento.add(menuTarjeta);
+
+        jMenuBar1.add(menuEvento);
+
+        menuClub.setText("Club");
+
+        menuEquipo.setText("Equipo");
+        menuEquipo.addActionListener(this::menuEquipoActionPerformed);
+        menuClub.add(menuEquipo);
+
+        menuDetalleEquipo.setText("DetalleEquipo");
+        menuDetalleEquipo.addActionListener(this::menuDetalleEquipoActionPerformed);
+        menuClub.add(menuDetalleEquipo);
+
+        jMenuBar1.add(menuClub);
+
+        setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addComponent(escritorio)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addComponent(escritorio, javax.swing.GroupLayout.Alignment.TRAILING)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void menuParticipanteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuParticipanteActionPerformed
+        abrirFormularioHijo(new VistaParticipante());
+    }//GEN-LAST:event_menuParticipanteActionPerformed
+
+    private void menuJugadorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuJugadorActionPerformed
+        abrirFormularioHijo(new VistaJugador());
+    }//GEN-LAST:event_menuJugadorActionPerformed
+
+    private void menuArbitroActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuArbitroActionPerformed
+        abrirFormularioHijo(new VistaArbitro());
+    }//GEN-LAST:event_menuArbitroActionPerformed
+
+    private void menuTorneoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuTorneoActionPerformed
+        abrirFormularioHijo(new VistaTorneo());
+    }//GEN-LAST:event_menuTorneoActionPerformed
+
+    private void menuJornadaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuJornadaActionPerformed
+        abrirFormularioHijo(new VistaJornada());
+    }//GEN-LAST:event_menuJornadaActionPerformed
+
+    private void menuLugarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuLugarActionPerformed
+        abrirFormularioHijo(new VistaLugar());
+    }//GEN-LAST:event_menuLugarActionPerformed
+
+    private void menuDetalleTorneoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuDetalleTorneoActionPerformed
+        abrirFormularioHijo(new VistaDetalleTorneo());
+    }//GEN-LAST:event_menuDetalleTorneoActionPerformed
+
+    private void menuPartidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuPartidoActionPerformed
+        abrirFormularioHijo(new VistaPartido());
+    }//GEN-LAST:event_menuPartidoActionPerformed
+
+    private void menuResultadoPartidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuResultadoPartidoActionPerformed
+        abrirFormularioHijo(new VistaResultadoPartido());
+    }//GEN-LAST:event_menuResultadoPartidoActionPerformed
+
+    private void menuGolActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuGolActionPerformed
+        abrirFormularioHijo(new VistaGol());
+    }//GEN-LAST:event_menuGolActionPerformed
+
+    private void menuTarjetaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuTarjetaActionPerformed
+        abrirFormularioHijo(new VistaTarjeta());
+    }//GEN-LAST:event_menuTarjetaActionPerformed
+
+    private void menuEquipoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuEquipoActionPerformed
+        abrirFormularioHijo(new VistaEquipo());
+    }//GEN-LAST:event_menuEquipoActionPerformed
+
+    private void menuDetalleEquipoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuDetalleEquipoActionPerformed
+        abrirFormularioHijo(new VistaDetalleEquipo());
+    }//GEN-LAST:event_menuDetalleEquipoActionPerformed
 
     /**
      * @param args the command line arguments
@@ -69,6 +222,42 @@ public class Menu extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(() -> new Menu().setVisible(true));
     }
 
+    public void abrirFormularioHijo(javax.swing.JInternalFrame formularioHijo) {
+        // 1. Limpiamos cualquier ventana que esté abierta en ese momento
+        escritorio.removeAll();
+        escritorio.repaint();
+
+        // 2. Metemos el formulario nuevo que nos pasaron
+        escritorio.add(formularioHijo);
+        formularioHijo.setVisible(true);
+
+        // 3. Lo maximizamos para que ocupe todo el espacio del menú
+        try {
+            formularioHijo.setMaximum(true);
+        } catch (Exception e) {
+            // Se ignora si falla
+        }
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JDesktopPane escritorio;
+    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem menuArbitro;
+    private javax.swing.JMenu menuClub;
+    private javax.swing.JMenuItem menuDetalleEquipo;
+    private javax.swing.JMenuItem menuDetalleTorneo;
+    private javax.swing.JMenuItem menuEquipo;
+    private javax.swing.JMenu menuEvento;
+    private javax.swing.JMenuItem menuGol;
+    private javax.swing.JMenuItem menuJornada;
+    private javax.swing.JMenu menuJuego;
+    private javax.swing.JMenuItem menuJugador;
+    private javax.swing.JMenuItem menuLugar;
+    private javax.swing.JMenuItem menuParticipante;
+    private javax.swing.JMenuItem menuPartido;
+    private javax.swing.JMenu menuPersona;
+    private javax.swing.JMenuItem menuResultadoPartido;
+    private javax.swing.JMenuItem menuTarjeta;
+    private javax.swing.JMenuItem menuTorneo;
     // End of variables declaration//GEN-END:variables
 }
