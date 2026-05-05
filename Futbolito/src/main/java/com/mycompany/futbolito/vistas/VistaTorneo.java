@@ -4,19 +4,55 @@
  */
 package com.mycompany.futbolito.vistas;
 
+import com.mycompany.futbolito.dao.TorneoDAO;
+import com.mycompany.futbolito.modelos.Torneo;
+import com.mycompany.futbolito.utilidades.ManejadorErroresBD;
+import javax.swing.JOptionPane;
+import java.util.Date;
+
 /**
  *
  * @author Usuario
  */
 public class VistaTorneo extends javax.swing.JInternalFrame {
 
+    private long idTorneoSeleccionado = -1;
     /**
      * Creates new form VistaDetalleTorneo
      */
     public VistaTorneo() {
         initComponents();
+        
+        // Ajustamos la altura de las filas
+        tablaTorneos.setRowHeight(30);
+        cargarTabla();
+        limpiarCampos();
     }
 
+    private void cargarTabla() {
+        try {
+            TorneoDAO dao = new TorneoDAO();
+            tablaTorneos.setModel(dao.obtenerModeloTorneos());
+            
+            // Auto-ajustamos las columnas usando tu clase de utilidades
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaTorneos);
+            tablaTorneos.getTableHeader().setReorderingAllowed(false);
+            
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }
+
+    private void limpiarCampos() {
+        txtNombreTorneo.setText("");
+        spinnerEdadMin.setValue(1);
+        spinnerEdadMax.setValue(1);
+        cbGenero.setSelectedIndex(0);
+        fechaIni.setDate(new Date());
+        fechaFin.setDate(new Date());
+        idTorneoSeleccionado = -1;
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -61,10 +97,17 @@ public class VistaTorneo extends javax.swing.JInternalFrame {
         jLabel4.setText("Género:");
 
         txtNombreTorneo.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        txtNombreTorneo.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtNombreTorneoKeyTyped(evt);
+            }
+        });
 
         spinnerEdadMin.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        spinnerEdadMin.setModel(new javax.swing.SpinnerNumberModel(1, 1, 100, 1));
 
         spinnerEdadMax.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        spinnerEdadMax.setModel(new javax.swing.SpinnerNumberModel(1, 1, 100, 1));
 
         cbGenero.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         cbGenero.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Masculino", "Femenino" }));
@@ -77,12 +120,15 @@ public class VistaTorneo extends javax.swing.JInternalFrame {
 
         btnAgregar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnAgregar.setText("Agregar");
+        btnAgregar.addActionListener(this::btnAgregarActionPerformed);
 
         btnModificar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnModificar.setText("Modificar");
+        btnModificar.addActionListener(this::btnModificarActionPerformed);
 
         btnEliminar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnEliminar.setText("Eliminar");
+        btnEliminar.addActionListener(this::btnEliminarActionPerformed);
 
         javax.swing.GroupLayout panelInputsLayout = new javax.swing.GroupLayout(panelInputs);
         panelInputs.setLayout(panelInputsLayout);
@@ -164,6 +210,11 @@ public class VistaTorneo extends javax.swing.JInternalFrame {
 
             }
         ));
+        tablaTorneos.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tablaTorneosMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tablaTorneos);
 
         javax.swing.GroupLayout panelDatosLayout = new javax.swing.GroupLayout(panelDatos);
@@ -200,6 +251,158 @@ public class VistaTorneo extends javax.swing.JInternalFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnAgregarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarActionPerformed
+        String nombre = txtNombreTorneo.getText().trim();
+        int edadMin = (int) spinnerEdadMin.getValue();
+        int edadMax = (int) spinnerEdadMax.getValue();
+        String genero = cbGenero.getSelectedItem().toString();
+        
+        // Convertimos a java.sql.Date directo para limpiar las horas y minutos (igual que .Date de C#)
+        java.sql.Date fIni = new java.sql.Date(fechaIni.getDate().getTime());
+        java.sql.Date fFin = new java.sql.Date(fechaFin.getDate().getTime());
+
+        // Validaciones
+        if (nombre.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Por favor complete todos los campos", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (edadMin > edadMax) {
+            JOptionPane.showMessageDialog(this, "La edad mínima no puede ser mayor que la edad máxima", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        // fIni.compareTo(fFin) > 0 significa que Inicio es DESPUÉS de Fin
+        if (fIni.compareTo(fFin) > 0) {
+            JOptionPane.showMessageDialog(this, "La fecha de inicio no puede ser posterior a la fecha de fin", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        // Usamos toString para comparar que no sean exactamente el mismo día
+        if (fIni.toString().equals(fFin.toString())) {
+            JOptionPane.showMessageDialog(this, "La fecha de inicio no puede ser igual a la fecha de fin", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        Torneo t = new Torneo();
+        t.setNombreTorneo(nombre);
+        t.setEdadMin(edadMin);
+        t.setEdadMax(edadMax);
+        t.setGenero(genero);
+        t.setFechaInicio(fIni);
+        t.setFechaFin(fFin);
+
+        try {
+            TorneoDAO dao = new TorneoDAO();
+            dao.insertarTorneo(t);
+            // Sin mensaje de éxito
+            cargarTabla();
+            limpiarCampos();
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }//GEN-LAST:event_btnAgregarActionPerformed
+
+    private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
+        if (idTorneoSeleccionado == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un Torneo para modificar", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String nombre = txtNombreTorneo.getText().trim();
+        int edadMin = (int) spinnerEdadMin.getValue();
+        int edadMax = (int) spinnerEdadMax.getValue();
+        String genero = cbGenero.getSelectedItem().toString();
+        
+        java.sql.Date fIni = new java.sql.Date(fechaIni.getDate().getTime());
+        java.sql.Date fFin = new java.sql.Date(fechaFin.getDate().getTime());
+
+        if (nombre.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Por favor complete todos los campos", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (edadMin > edadMax) {
+            JOptionPane.showMessageDialog(this, "La edad mínima no puede ser mayor que la edad máxima", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (fIni.compareTo(fFin) > 0) {
+            JOptionPane.showMessageDialog(this, "La fecha de inicio no puede ser posterior a la fecha de fin", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (fIni.toString().equals(fFin.toString())) {
+            JOptionPane.showMessageDialog(this, "La fecha de inicio no puede ser igual a la fecha de fin", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        Torneo t = new Torneo();
+        t.setIdTorneo(idTorneoSeleccionado);
+        t.setNombreTorneo(nombre);
+        t.setEdadMin(edadMin);
+        t.setEdadMax(edadMax);
+        t.setGenero(genero);
+        t.setFechaInicio(fIni);
+        t.setFechaFin(fFin);
+
+        try {
+            TorneoDAO dao = new TorneoDAO();
+            dao.modificarTorneo(t);
+            // Sin mensaje de éxito
+            cargarTabla();
+            limpiarCampos();
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }//GEN-LAST:event_btnModificarActionPerformed
+
+    private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
+        if (idTorneoSeleccionado == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un Torneo para eliminar", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Se elimina sin confirmación, directo al DAO
+        try {
+            TorneoDAO dao = new TorneoDAO();
+            dao.eliminarTorneo(idTorneoSeleccionado);
+            // Sin mensaje de éxito
+            cargarTabla();
+            limpiarCampos();
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }//GEN-LAST:event_btnEliminarActionPerformed
+
+    private void tablaTorneosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaTorneosMouseClicked
+        int fila = tablaTorneos.getSelectedRow();
+        if (fila >= 0) {
+            try {
+                idTorneoSeleccionado = Long.parseLong(tablaTorneos.getValueAt(fila, 0).toString());
+                txtNombreTorneo.setText(tablaTorneos.getValueAt(fila, 1).toString());
+                spinnerEdadMin.setValue(Integer.parseInt(tablaTorneos.getValueAt(fila, 2).toString()));
+                spinnerEdadMax.setValue(Integer.parseInt(tablaTorneos.getValueAt(fila, 3).toString()));
+                cbGenero.setSelectedItem(tablaTorneos.getValueAt(fila, 4).toString());
+                
+                // Conversión de las fechas de la tabla al JCalendar
+                java.sql.Date fechaIniSQL = (java.sql.Date) tablaTorneos.getValueAt(fila, 5);
+                java.sql.Date fechaFinSQL = (java.sql.Date) tablaTorneos.getValueAt(fila, 6);
+                
+                fechaIni.setDate(new java.util.Date(fechaIniSQL.getTime()));
+                fechaFin.setDate(new java.util.Date(fechaFinSQL.getTime()));
+                
+            } catch (Exception ex) {
+                // En C# tenías un "Error al seleccionar el torneo", aquí aplicamos el limpiaElementos() como tenías
+            JOptionPane.showMessageDialog(this, "Error al cargar los torneos", "Atención", JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    }//GEN-LAST:event_tablaTorneosMouseClicked
+
+    private void txtNombreTorneoKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtNombreTorneoKeyTyped
+    if (txtNombreTorneo.getText().length() >= 50)
+            evt.consume();
+        
+    }//GEN-LAST:event_txtNombreTorneoKeyTyped
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
