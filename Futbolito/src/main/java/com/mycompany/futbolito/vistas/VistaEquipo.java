@@ -4,17 +4,103 @@
  */
 package com.mycompany.futbolito.vistas;
 
+import com.mycompany.futbolito.dao.EquipoDAO;
+import com.mycompany.futbolito.modelos.Equipo;
+import com.mycompany.futbolito.utilidades.ManejadorErroresBD;
+import javax.swing.JOptionPane;
+import javax.swing.ImageIcon;
+import java.awt.Image;
+import java.net.URL;
+import javax.imageio.ImageIO;
+
 /**
  *
  * @author Usuario
  */
 public class VistaEquipo extends javax.swing.JInternalFrame {
-
+    private long idEquipoSeleccionado = -1;
     /**
      * Creates new form VistaEquipo
      */
     public VistaEquipo() {
         initComponents();
+        
+        // El mismo alto de fila que tenías en C# (60) para que quepa la imagen bien
+        tablaEquipos.setRowHeight(60);
+        
+        cargarTabla();
+        limpiarCampos();
+    }
+    
+    private void cargarTabla() {
+        try {
+            EquipoDAO dao = new EquipoDAO();
+            tablaEquipos.setModel(dao.obtenerModeloEquipos());
+            
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaEquipos);
+            
+            // Configuramos la columna de la Imagen para que tenga un ancho de 80
+            tablaEquipos.getColumnModel().getColumn(2).setPreferredWidth(80);
+            
+            // Ocultamos la columna 4 (que trae el texto de la URL)
+            tablaEquipos.getColumnModel().getColumn(4).setMinWidth(0);
+            tablaEquipos.getColumnModel().getColumn(4).setMaxWidth(0);
+            tablaEquipos.getColumnModel().getColumn(4).setWidth(0);
+            
+            tablaEquipos.getTableHeader().setReorderingAllowed(false);
+            
+            // LA MAGIA DE JAVA: Llamamos a la descarga de imágenes en el fondo
+            cargarImagenesAsincrono();
+            
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }
+
+    // Equivale a tu "async void cargaEquipos()" en C#
+    private void cargarImagenesAsincrono() {
+        Thread hiloDescarga = new Thread(() -> {
+            for (int i = 0; i < tablaEquipos.getRowCount(); i++) {
+                // Sacamos la URL de la columna 4 (la oculta)
+                String urlTexto = (String) tablaEquipos.getModel().getValueAt(i, 4);
+                
+                if (urlTexto != null && !urlTexto.isEmpty()) {
+                    try {
+                        URL url = new URL(urlTexto);
+                        
+                        // --- EL TRUCO DEL USER-AGENT ---
+                        java.net.HttpURLConnection conexionHttp = (java.net.HttpURLConnection) url.openConnection();
+                        // Nos disfrazamos de navegador de Windows para que Wikipedia no nos bloquee
+                        conexionHttp.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+                        
+                        // Leemos la imagen pero desde nuestra conexión disfrazada
+                        Image img = ImageIO.read(conexionHttp.getInputStream());
+                        // -------------------------------
+                        
+                        if (img != null) {
+                            Image imgEscalada = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+                            ImageIcon icono = new ImageIcon(imgEscalada);
+                            
+                            final int filaActual = i;
+                            javax.swing.SwingUtilities.invokeLater(() -> {
+                                tablaEquipos.getModel().setValueAt(icono, filaActual, 2);
+                            });
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Error descargando imagen de " + urlTexto + ": " + e.getMessage());
+                    }
+                }
+            }
+        });
+        
+        // Arrancamos el hilo secundario
+        hiloDescarga.start();
+    }
+
+    private void limpiarCampos() {
+        txtNombre.setText("");
+        txtUrl.setText("");
+        idEquipoSeleccionado = -1;
     }
 
     /**
@@ -47,17 +133,30 @@ public class VistaEquipo extends javax.swing.JInternalFrame {
         jLabel2.setText("URL del logotipo:");
 
         txtUrl.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        txtUrl.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtUrlKeyTyped(evt);
+            }
+        });
 
         txtNombre.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        txtNombre.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtNombreKeyTyped(evt);
+            }
+        });
 
         btnAgregar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnAgregar.setText("Agregar");
+        btnAgregar.addActionListener(this::btnAgregarActionPerformed);
 
         btnModificar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnModificar.setText("Modificar");
+        btnModificar.addActionListener(this::btnModificarActionPerformed);
 
         btnEliminar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnEliminar.setText("Eliminar");
+        btnEliminar.addActionListener(this::btnEliminarActionPerformed);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -118,6 +217,11 @@ public class VistaEquipo extends javax.swing.JInternalFrame {
 
             }
         ));
+        tablaEquipos.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tablaEquiposMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tablaEquipos);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -154,6 +258,115 @@ public class VistaEquipo extends javax.swing.JInternalFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnAgregarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarActionPerformed
+        String nombre = txtNombre.getText().trim();
+        String logo = txtUrl.getText().trim();
+
+        if (nombre.isEmpty() || logo.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Por favor complete todos los campos", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            EquipoDAO dao = new EquipoDAO();
+            
+            if (dao.existeNombreEquipo(nombre, -1)) {
+                JOptionPane.showMessageDialog(this, "Ya existe un equipo con ese nombre.", "Atención", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            Equipo e = new Equipo();
+            e.setNombreEquipo(nombre);
+            e.setLogo(logo);
+
+            dao.insertarEquipo(e);
+            // Sin mensaje de confirmación
+            cargarTabla();
+            limpiarCampos();
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }//GEN-LAST:event_btnAgregarActionPerformed
+
+    private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
+        if (idEquipoSeleccionado == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un Equipo para modificar", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String nombre = txtNombre.getText().trim();
+        String logo = txtUrl.getText().trim();
+
+        if (nombre.isEmpty() || logo.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Complete todos los campos", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            EquipoDAO dao = new EquipoDAO();
+            
+            if (dao.existeNombreEquipo(nombre, idEquipoSeleccionado)) {
+                JOptionPane.showMessageDialog(this, "Ya existe un equipo con ese nombre.", "Atención", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            Equipo e = new Equipo();
+            e.setIdEquipo(idEquipoSeleccionado);
+            e.setNombreEquipo(nombre);
+            e.setLogo(logo);
+
+            dao.modificarEquipo(e);
+            cargarTabla();
+            limpiarCampos();
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }//GEN-LAST:event_btnModificarActionPerformed
+
+    private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
+        if (idEquipoSeleccionado == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un Equipo para eliminar", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Eliminación directa sin confirmación
+        try {
+            EquipoDAO dao = new EquipoDAO();
+            dao.eliminarEquipo(idEquipoSeleccionado);
+            cargarTabla();
+            limpiarCampos();
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }//GEN-LAST:event_btnEliminarActionPerformed
+
+    private void tablaEquiposMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaEquiposMouseClicked
+        int fila = tablaEquipos.getSelectedRow();
+        if (fila >= 0) {
+            try {
+                idEquipoSeleccionado = Long.parseLong(tablaEquipos.getValueAt(fila, 0).toString());
+                txtNombre.setText(tablaEquipos.getValueAt(fila, 1).toString());
+                
+                // La columna 2 es la imagen, la 3 son los jugadores, la 4 es el texto de la URL
+                txtUrl.setText(tablaEquipos.getValueAt(fila, 4).toString());
+                
+            } catch (Exception ex) {
+                // Si hay error, simplemente limpiamos como tenías en C#
+                limpiarCampos();
+            }
+        }
+    }//GEN-LAST:event_tablaEquiposMouseClicked
+
+    private void txtNombreKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtNombreKeyTyped
+        if (txtNombre.getText().length() >= 50)
+            evt.consume();
+    }//GEN-LAST:event_txtNombreKeyTyped
+
+    private void txtUrlKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtUrlKeyTyped
+        if (txtUrl.getText().length() >= 500)
+            evt.consume();
+    }//GEN-LAST:event_txtUrlKeyTyped
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
