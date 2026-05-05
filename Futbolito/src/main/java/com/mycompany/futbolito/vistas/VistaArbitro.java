@@ -4,23 +4,76 @@
  */
 package com.mycompany.futbolito.vistas;
 
+import com.mycompany.futbolito.dao.ArbitroDAO;
+import com.mycompany.futbolito.dao.ParticipanteDAO;
+import com.mycompany.futbolito.modelos.Arbitro;
+import com.mycompany.futbolito.utilidades.ManejadorErroresBD;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author Usuario
  */
 public class VistaArbitro extends javax.swing.JInternalFrame {
-
+    private long idArbitroSeleccionado = -1;
+    private long idParticipanteHeredado = -1;
     /**
      * Creates new form VistaArbitro
      */
     public VistaArbitro() {
-        initComponents();
+        this(-1);
     }
     
     public VistaArbitro(long id) {
         initComponents();
+        this.idParticipanteHeredado = id;
+        cargarTabla();
+        // Ajustamos la altura de las filas para que no se vea aplastado
+        tablaArbitros.setRowHeight(30);
+        if (idParticipanteHeredado != -1) {
+            btnAgregar.setEnabled(true);
+            cargarNombreForaneo(idParticipanteHeredado);
+        }
     }
 
+    private void cargarNombreForaneo(long id) {
+        try {
+            ArbitroDAO dao = new ArbitroDAO();
+            String nombre = dao.obtenerNombreParticipante(id);
+            txtNombre.setText(nombre); 
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }
+    
+    private void cargarTabla() {
+        try {
+            ArbitroDAO dao = new ArbitroDAO();
+            tablaArbitros.setModel(dao.obtenerModeloArbitros());
+            
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaArbitros);
+            
+            // Ocultamos la columna 0 (IdParticipante)
+            tablaArbitros.getColumnModel().getColumn(0).setMinWidth(0);
+            tablaArbitros.getColumnModel().getColumn(0).setMaxWidth(0);
+            tablaArbitros.getColumnModel().getColumn(0).setMaxWidth(0);
+            tablaArbitros.getColumnModel().getColumn(0).setWidth(0);
+            
+            tablaArbitros.getTableHeader().setReorderingAllowed(false);
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }
+
+    private void limpiarCampos() {
+        txtCedula.setText("");
+        idArbitroSeleccionado = -1;
+        
+        if (idParticipanteHeredado == -1) {
+            txtNombre.setText("");
+        }
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -54,15 +107,23 @@ public class VistaArbitro extends javax.swing.JInternalFrame {
         txtNombre.setEnabled(false);
 
         txtCedula.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        txtCedula.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtCedulaKeyTyped(evt);
+            }
+        });
 
         btnAgregar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnAgregar.setText("Agregar");
+        btnAgregar.addActionListener(this::btnAgregarActionPerformed);
 
         btnModificar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnModificar.setText("Modificar");
+        btnModificar.addActionListener(this::btnModificarActionPerformed);
 
         btnEliminar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnEliminar.setText("Eliminar");
+        btnEliminar.addActionListener(this::btnEliminarActionPerformed);
 
         javax.swing.GroupLayout panelInputsLayout = new javax.swing.GroupLayout(panelInputs);
         panelInputs.setLayout(panelInputsLayout);
@@ -116,6 +177,11 @@ public class VistaArbitro extends javax.swing.JInternalFrame {
 
             }
         ));
+        tablaArbitros.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tablaArbitrosMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tablaArbitros);
 
         javax.swing.GroupLayout panelDatosLayout = new javax.swing.GroupLayout(panelDatos);
@@ -152,6 +218,119 @@ public class VistaArbitro extends javax.swing.JInternalFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnAgregarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarActionPerformed
+        if (idParticipanteHeredado == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un Participante desde el formulario de Participantes", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String cedula = txtCedula.getText().trim();
+
+        if (cedula.isEmpty() || cedula.length() < 15) {
+            JOptionPane.showMessageDialog(this, "Ingrese la Cédula Profesional (Mínimo 15 caracteres).", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            // Reutilizamos el DAO de participante para revisar si ya es jugador (Tipo 1)
+            ParticipanteDAO daoParticipante = new ParticipanteDAO();
+            boolean esJugador = daoParticipante.yaEstaRegistradoComo(idParticipanteHeredado, 1);
+            
+            if (esJugador) {
+                JOptionPane.showMessageDialog(this, "Este participante ya tiene el rol de Jugador, no puede ser Árbitro.", "Atención", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            Arbitro a = new Arbitro();
+            a.setIdParticipante(idParticipanteHeredado);
+            a.setCedulaArbitro(cedula);
+
+            ArbitroDAO dao = new ArbitroDAO();
+            dao.insertarArbitro(a);
+            
+            //JOptionPane.showMessageDialog(this, "Árbitro agregado exitosamente.");
+            
+            idParticipanteHeredado = -1;
+            //btnAgregar.setEnabled(false); 
+            
+            cargarTabla();
+            limpiarCampos();
+            
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }//GEN-LAST:event_btnAgregarActionPerformed
+
+    private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
+        if (idArbitroSeleccionado == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un Árbitro para modificar", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String cedula = txtCedula.getText().trim();
+
+        if (cedula.isEmpty() || cedula.length() < 15) {
+            JOptionPane.showMessageDialog(this, "Ingrese la nueva Cédula Profesional (Mínimo 15 caracteres).", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        Arbitro a = new Arbitro();
+        a.setIdArbitro(idArbitroSeleccionado);
+        a.setCedulaArbitro(cedula);
+
+        try {
+            ArbitroDAO dao = new ArbitroDAO();
+            dao.modificarArbitro(a);
+            //JOptionPane.showMessageDialog(this, "Árbitro modificado exitosamente.");
+            cargarTabla();
+            limpiarCampos();
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }//GEN-LAST:event_btnModificarActionPerformed
+
+    private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
+        if (idArbitroSeleccionado == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un Árbitro para eliminar", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        try {
+            ArbitroDAO dao = new ArbitroDAO();
+            dao.eliminarArbitro(idArbitroSeleccionado);
+            //JOptionPane.showMessageDialog(this, "Árbitro eliminado exitosamente.");
+            cargarTabla();
+            limpiarCampos();
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }//GEN-LAST:event_btnEliminarActionPerformed
+
+    private void tablaArbitrosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaArbitrosMouseClicked
+        int fila = tablaArbitros.getSelectedRow();
+        if (fila >= 0) {
+            try {
+                // Columna 0 es IdParticipante, Columna 1 es IdArbitro
+                idArbitroSeleccionado = Long.parseLong(tablaArbitros.getValueAt(fila, 1).toString());
+                
+                long idParticipanteDeTabla = Long.parseLong(tablaArbitros.getValueAt(fila, 0).toString());
+                cargarNombreForaneo(idParticipanteDeTabla);
+                
+                txtCedula.setText(tablaArbitros.getValueAt(fila, 3).toString());
+                
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error al cargar los datos de la tabla: " + ex.getMessage());
+            }
+        }
+    }//GEN-LAST:event_tablaArbitrosMouseClicked
+
+    private void txtCedulaKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCedulaKeyTyped
+        char c = evt.getKeyChar();
+    
+        if (txtCedula.getText().length() >= 15) {
+            evt.consume(); // Si ya hay 10 caracteres, ya no deja escribir más
+        }
+    }//GEN-LAST:event_txtCedulaKeyTyped
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
