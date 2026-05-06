@@ -29,8 +29,8 @@ public class JugadorDAO {
     public DefaultTableModel obtenerModeloJugadores() throws Exception {
         DefaultTableModel modelo = new DefaultTableModel();
         // Agregamos las columnas igual que en tu C#
-        modelo.addColumn("IdParticipante"); // Esta la vamos a ocultar visualmente
-        modelo.addColumn("ID Jugador");
+        modelo.addColumn("ID Jugador"); // Esta la vamos a ocultar visualmente
+        modelo.addColumn("ID Participante");
         modelo.addColumn("Nombre (Edad)");
         modelo.addColumn("Posición");
         modelo.addColumn("Número");
@@ -41,19 +41,20 @@ public class JugadorDAO {
         ClaseConexion objetoConexion = new ClaseConexion();
         Connection cn = objetoConexion.establecerConexion();
 
-        String sql = "SELECT p.IdParticipante, j.IdJugador, " +
+        String sql = "SELECT j.IdJugador, p.IdParticipante,  " +
                      "CONCAT(p.NombreParticipante, ' (', p.Edad, ' años)') AS NombreConEdad, " +
                      "j.Posicion, j.Numero, j.TipoSangre, j.AcumuladorAmarillas, j.Estado " +
                      "FROM Persona.Jugador j " +
-                     "INNER JOIN Persona.Participante p ON j.IdParticipante = p.IdParticipante";
+                     "INNER JOIN Persona.Participante p ON j.IdParticipante = p.IdParticipante "+
+                     "ORDER BY j.IdJugador";
                      
         PreparedStatement ps = cn.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
 
         while (rs.next()) {
             modelo.addRow(new Object[]{
-                rs.getLong("IdParticipante"),
                 rs.getLong("IdJugador"),
+                rs.getLong("IdParticipante"),
                 rs.getString("NombreConEdad"),
                 rs.getString("Posicion"),
                 rs.getInt("Numero"),

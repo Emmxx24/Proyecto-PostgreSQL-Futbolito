@@ -25,7 +25,7 @@ public class ParticipanteDAO {
         
         if (cn == null) throw new Exception("No hay conexión a PostgreSQL.");
 
-        String sql = "SELECT * FROM Persona.Participante";
+        String sql = "SELECT * FROM Persona.Participante p ORDER BY p.IdParticipante";
         PreparedStatement ps = cn.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
 

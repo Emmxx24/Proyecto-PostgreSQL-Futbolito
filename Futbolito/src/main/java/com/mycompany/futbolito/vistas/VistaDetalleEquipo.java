@@ -4,6 +4,12 @@
  */
 package com.mycompany.futbolito.vistas;
 
+import com.mycompany.futbolito.dao.DetalleEquipoDAO;
+import com.mycompany.futbolito.utilidades.ManejadorErroresBD;
+import javax.swing.JOptionPane;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author Usuario
@@ -13,10 +19,72 @@ public class VistaDetalleEquipo extends javax.swing.JInternalFrame {
     /**
      * Creates new form VistaDetalleEquipo
      */
+    private List<DetalleEquipoDAO.ItemEquipo> listaEquipos = new ArrayList<>();
+    private List<DetalleEquipoDAO.ItemJugador> listaJugadores = new ArrayList<>();
+    
+    private long idEquipoViejo = -1;
+    private long idJugadorViejo = -1;
+
     public VistaDetalleEquipo() {
         initComponents();
+        tablaDetalleEquipo.setRowHeight(30);
+        
+        cargarCombos();
+        cargarTabla();
+        limpiarCampos();
     }
 
+    private void cargarCombos() {
+        try {
+            DetalleEquipoDAO dao = new DetalleEquipoDAO();
+            
+            cbEquipo.removeAllItems();
+            listaEquipos = dao.obtenerEquiposCombo();
+            for (DetalleEquipoDAO.ItemEquipo item : listaEquipos) {
+                cbEquipo.addItem(item.texto);
+            }
+            cbEquipo.setSelectedIndex(-1);
+            
+            cbJugador.removeAllItems();
+            listaJugadores = dao.obtenerJugadoresCombo();
+            for (DetalleEquipoDAO.ItemJugador item : listaJugadores) {
+                cbJugador.addItem(item.texto);
+            }
+            cbJugador.setSelectedIndex(-1);
+            
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }
+
+    private void cargarTabla() {
+        try {
+            DetalleEquipoDAO dao = new DetalleEquipoDAO();
+            tablaDetalleEquipo.setModel(dao.obtenerModeloDetalleEquipo());
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaDetalleEquipo);
+            
+            tablaDetalleEquipo.getColumnModel().getColumn(0).setMinWidth(0);
+            tablaDetalleEquipo.getColumnModel().getColumn(0).setMaxWidth(0);
+            tablaDetalleEquipo.getColumnModel().getColumn(0).setWidth(0);
+            
+            tablaDetalleEquipo.getColumnModel().getColumn(1).setMinWidth(0);
+            tablaDetalleEquipo.getColumnModel().getColumn(1).setMaxWidth(0);
+            tablaDetalleEquipo.getColumnModel().getColumn(1).setWidth(0);
+            
+            tablaDetalleEquipo.getTableHeader().setReorderingAllowed(false);
+            
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }
+
+    private void limpiarCampos() {
+        cbEquipo.setSelectedIndex(-1);
+        cbJugador.setSelectedIndex(-1);
+        idEquipoViejo = -1;
+        idJugadorViejo = -1;
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -53,12 +121,15 @@ public class VistaDetalleEquipo extends javax.swing.JInternalFrame {
 
         btnAgregar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnAgregar.setText("Agregar");
+        btnAgregar.addActionListener(this::btnAgregarActionPerformed);
 
         btnModificar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnModificar.setText("Modificar");
+        btnModificar.addActionListener(this::btnModificarActionPerformed);
 
         btnEliminar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnEliminar.setText("Eliminar");
+        btnEliminar.addActionListener(this::btnEliminarActionPerformed);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -115,6 +186,11 @@ public class VistaDetalleEquipo extends javax.swing.JInternalFrame {
 
             }
         ));
+        tablaDetalleEquipo.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tablaDetalleEquipoMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tablaDetalleEquipo);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -151,6 +227,103 @@ public class VistaDetalleEquipo extends javax.swing.JInternalFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnAgregarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarActionPerformed
+        if (cbEquipo.getSelectedIndex() == -1 || cbJugador.getSelectedIndex() == -1) {
+            JOptionPane.showMessageDialog(this, "Debe seleccionar un equipo y un jugador", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        DetalleEquipoDAO.ItemEquipo equipoSel = listaEquipos.get(cbEquipo.getSelectedIndex());
+        long idJugadorNuevo = listaJugadores.get(cbJugador.getSelectedIndex()).idJugador;
+
+        try {
+            DetalleEquipoDAO dao = new DetalleEquipoDAO();
+            String errorValidacion = dao.validarInscripcion(equipoSel.idTorneo, equipoSel.idEquipo, idJugadorNuevo, -1, -1);
+            if (errorValidacion != null) {
+                JOptionPane.showMessageDialog(this, errorValidacion, "Atención", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            dao.insertarDetalle(equipoSel.idEquipo, idJugadorNuevo);
+            cargarTabla();
+            limpiarCampos();
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }//GEN-LAST:event_btnAgregarActionPerformed
+
+    private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
+        if (idEquipoViejo == -1 || idJugadorViejo == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un registro", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (cbEquipo.getSelectedIndex() == -1 || cbJugador.getSelectedIndex() == -1) {
+            JOptionPane.showMessageDialog(this, "Debe seleccionar un equipo y un jugador", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        DetalleEquipoDAO.ItemEquipo equipoSel = listaEquipos.get(cbEquipo.getSelectedIndex());
+        long idJugadorNuevo = listaJugadores.get(cbJugador.getSelectedIndex()).idJugador;
+
+        try {
+            DetalleEquipoDAO dao = new DetalleEquipoDAO();
+            String errorValidacion = dao.validarInscripcion(equipoSel.idTorneo, equipoSel.idEquipo, idJugadorNuevo, idEquipoViejo, idJugadorViejo);
+            if (errorValidacion != null) {
+                JOptionPane.showMessageDialog(this, errorValidacion, "Atención", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            dao.modificarDetalle(equipoSel.idEquipo, idJugadorNuevo, idEquipoViejo, idJugadorViejo);
+            cargarTabla();
+            limpiarCampos();
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }//GEN-LAST:event_btnModificarActionPerformed
+
+    private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
+        if (idEquipoViejo == -1 || idJugadorViejo == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un registro", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            DetalleEquipoDAO dao = new DetalleEquipoDAO();
+            dao.eliminarDetalle(idEquipoViejo, idJugadorViejo);
+            cargarTabla();
+            limpiarCampos();
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }//GEN-LAST:event_btnEliminarActionPerformed
+
+    private void tablaDetalleEquipoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaDetalleEquipoMouseClicked
+        int fila = tablaDetalleEquipo.getSelectedRow();
+        if (fila >= 0) {
+            try {
+                idEquipoViejo = Long.parseLong(tablaDetalleEquipo.getValueAt(fila, 0).toString());
+                idJugadorViejo = Long.parseLong(tablaDetalleEquipo.getValueAt(fila, 1).toString());
+                
+                int indexEquipo = -1;
+                for (int i = 0; i < listaEquipos.size(); i++) {
+                    if (listaEquipos.get(i).idEquipo == idEquipoViejo) { indexEquipo = i; break; }
+                }
+                
+                int indexJugador = -1;
+                for (int i = 0; i < listaJugadores.size(); i++) {
+                    if (listaJugadores.get(i).idJugador == idJugadorViejo) { indexJugador = i; break; }
+                }
+                
+                cbEquipo.setSelectedIndex(indexEquipo);
+                cbJugador.setSelectedIndex(indexJugador);
+                
+            } catch (Exception ex) {
+                limpiarCampos();
+            }
+        }
+    }//GEN-LAST:event_tablaDetalleEquipoMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

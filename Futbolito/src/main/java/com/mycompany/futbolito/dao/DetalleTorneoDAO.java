@@ -23,7 +23,10 @@ public class DetalleTorneoDAO {
         Connection cn = objetoConexion.establecerConexion();
 
         // Usamos TO_CHAR en PostgreSQL equivalente al CONVERT de C#
-        String sql = "SELECT T.IdTorneo, CONCAT(T.NombreTorneo, ' (', TO_CHAR(T.FechaInicio, 'DD/MM/YYYY'), ' - ', TO_CHAR(T.FechaFin, 'DD/MM/YYYY'), ')') AS NombreCompleto FROM Juego.Torneo T";
+        String sql = "SELECT T.IdTorneo, CONCAT(T.NombreTorneo, ' (', TO_CHAR(T.FechaInicio, 'DD/MM/YYYY'), ' - ', " +
+                "TO_CHAR(T.FechaFin, 'DD/MM/YYYY'), ')') "+
+                "AS NombreCompleto FROM Juego.Torneo T " +
+                "ORDER BY T.IdTorneo";
         PreparedStatement ps = cn.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
 
@@ -38,7 +41,7 @@ public class DetalleTorneoDAO {
         ClaseConexion objetoConexion = new ClaseConexion();
         Connection cn = objetoConexion.establecerConexion();
 
-        String sql = "SELECT IdEquipo, NombreEquipo FROM Club.Equipo";
+        String sql = "SELECT IdEquipo, NombreEquipo FROM Club.Equipo ORDER BY IdEquipo";
         PreparedStatement ps = cn.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
 

@@ -275,17 +275,17 @@ FOR EACH ROW EXECUTE FUNCTION Juego.fn_tr_actualizar_torneo();
 CREATE OR REPLACE FUNCTION Club.fn_tr_detalleequipo_cantidad()
 RETURNS TRIGGER AS $$
 BEGIN
-    IF (TG_OP = 'INSERT') THEN
-        UPDATE Club.Equipo SET CantJugadores = (SELECT COUNT(*) FROM Club.DetalleEquipo WHERE IdEquipo = NEW.IdEquipo)
-        WHERE IdEquipo = NEW.IdEquipo;
-    ELSIF (TG_OP = 'DELETE') THEN
-        UPDATE Club.Equipo SET CantJugadores = (SELECT COUNT(*) FROM Club.DetalleEquipo WHERE IdEquipo = OLD.IdEquipo)
-        WHERE IdEquipo = OLD.IdEquipo;
+    IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
+        UPDATE Club.Equipo SET CantJugadores = (SELECT COUNT(*) FROM Club.DetalleEquipo WHERE IdEquipo = NEW.IdEquipo) WHERE IdEquipo = NEW.IdEquipo;
+    END IF;
+    IF (TG_OP = 'DELETE' OR (TG_OP = 'UPDATE' AND OLD.IdEquipo <> NEW.IdEquipo)) THEN
+        UPDATE Club.Equipo SET CantJugadores = (SELECT COUNT(*) FROM Club.DetalleEquipo WHERE IdEquipo = OLD.IdEquipo) WHERE IdEquipo = OLD.IdEquipo;
     END IF;
     RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS TR_DETALLEEQUIPO_CANTIDAD ON Club.DetalleEquipo;
 CREATE TRIGGER TR_DETALLEEQUIPO_CANTIDAD
-AFTER INSERT OR DELETE ON Club.DetalleEquipo
+AFTER INSERT OR UPDATE OR DELETE ON Club.DetalleEquipo
 FOR EACH ROW EXECUTE FUNCTION Club.fn_tr_detalleequipo_cantidad();

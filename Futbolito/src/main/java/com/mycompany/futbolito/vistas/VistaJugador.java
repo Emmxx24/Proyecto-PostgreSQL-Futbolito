@@ -63,9 +63,9 @@ public class VistaJugador extends javax.swing.JInternalFrame {
             com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaJugadores);
             
             // TRUCO: Ocultar la columna "IdParticipante" (Índice 0) para que no se vea
-            tablaJugadores.getColumnModel().getColumn(0).setMinWidth(0);
-            tablaJugadores.getColumnModel().getColumn(0).setMaxWidth(0);
-            tablaJugadores.getColumnModel().getColumn(0).setWidth(0);
+            //tablaJugadores.getColumnModel().getColumn(0).setMinWidth(0);
+            //tablaJugadores.getColumnModel().getColumn(0).setMaxWidth(0);
+            //tablaJugadores.getColumnModel().getColumn(0).setWidth(0);
             
             tablaJugadores.getTableHeader().setReorderingAllowed(false);
         } catch (Exception ex) {
@@ -356,9 +356,9 @@ public class VistaJugador extends javax.swing.JInternalFrame {
         if (fila >= 0) {
             try {
                 // Columna 0 es IdParticipante (Oculta), Columna 1 es IdJugador
-                idJugadorSeleccionado = Long.parseLong(tablaJugadores.getValueAt(fila, 1).toString());
+                idJugadorSeleccionado = Long.parseLong(tablaJugadores.getValueAt(fila, 0).toString());
                 
-                long idParticipanteDeTabla = Long.parseLong(tablaJugadores.getValueAt(fila, 0).toString());
+                long idParticipanteDeTabla = Long.parseLong(tablaJugadores.getValueAt(fila, 1).toString());
                 cargarNombreForaneo(idParticipanteDeTabla);
                 
                 cbPosicion.setSelectedItem(tablaJugadores.getValueAt(fila, 3).toString());

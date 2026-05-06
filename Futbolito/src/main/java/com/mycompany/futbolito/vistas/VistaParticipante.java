@@ -381,7 +381,7 @@ public class VistaParticipante extends javax.swing.JInternalFrame {
             try {
                 ParticipanteDAO dao = new ParticipanteDAO();
                 dao.eliminarParticipante(idParticipanteSeleccionado);
-                JOptionPane.showMessageDialog(this, "Participante eliminado exitosamente.");
+                //JOptionPane.showMessageDialog(this, "Participante eliminado exitosamente.");
                 cargarTabla();
                 limpiarCampos();
             } catch (Exception ex) {
