@@ -4,19 +4,49 @@
  */
 package com.mycompany.futbolito.vistas;
 
+import com.mycompany.futbolito.dao.LugarDAO;
+import com.mycompany.futbolito.modelos.Lugar;
+import com.mycompany.futbolito.utilidades.ManejadorErroresBD;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author Usuario
  */
 public class VistaLugar extends javax.swing.JInternalFrame {
-
+    private long idLugarSeleccionado = -1;
     /**
      * Creates new form VistaLugar
      */
     public VistaLugar() {
         initComponents();
+        
+        tablaLugares.setRowHeight(30);
+        
+        cargarTabla();
+        limpiarCampos();
     }
 
+    private void cargarTabla() {
+        try {
+            LugarDAO dao = new LugarDAO();
+            tablaLugares.setModel(dao.obtenerModeloLugares());
+            
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaLugares);
+            tablaLugares.getTableHeader().setReorderingAllowed(false);
+            
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }
+    
+    private void limpiarCampos() {
+        txtNombre.setText("");
+        txtUbicacion.setText("");
+        capacidad.setValue(1001); 
+        idLugarSeleccionado = -1;
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -143,6 +173,11 @@ public class VistaLugar extends javax.swing.JInternalFrame {
 
             }
         ));
+        tablaLugares.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tablaLugaresMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tablaLugares);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -181,15 +216,85 @@ public class VistaLugar extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
-        // TODO add your handling code here:
+        if (idLugarSeleccionado == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un Lugar para eliminar", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            LugarDAO dao = new LugarDAO();
+            dao.eliminarLugar(idLugarSeleccionado);
+            cargarTabla();
+            limpiarCampos();
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
     }//GEN-LAST:event_btnEliminarActionPerformed
 
     private void btnAgregarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarActionPerformed
-        // TODO add your handling code here:
+        String nombre = txtNombre.getText().trim();
+        String ubicacion = txtUbicacion.getText().trim();
+        int cap = (int) capacidad.getValue();
+
+        if (nombre.isEmpty() || ubicacion.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Por favor complete todos los campos", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (cap <= 1000) {
+            JOptionPane.showMessageDialog(this, "La capacidad debe ser mayor a 1000", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        Lugar l = new Lugar();
+        l.setNombre(nombre);
+        l.setUbicacion(ubicacion);
+        l.setCapacidad(cap);
+
+        try {
+            LugarDAO dao = new LugarDAO();
+            dao.insertarLugar(l);
+            cargarTabla();
+            limpiarCampos();
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
     }//GEN-LAST:event_btnAgregarActionPerformed
 
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
-        // TODO add your handling code here:
+        if (idLugarSeleccionado == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un Lugar para modificar", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String nombre = txtNombre.getText().trim();
+        String ubicacion = txtUbicacion.getText().trim();
+        int cap = (int) capacidad.getValue();
+
+        if (nombre.isEmpty() || ubicacion.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Por favor complete todos los campos", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (cap <= 1000) {
+            JOptionPane.showMessageDialog(this, "La capacidad debe ser mayor a 1000", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        Lugar l = new Lugar();
+        l.setIdLugar(idLugarSeleccionado);
+        l.setNombre(nombre);
+        l.setUbicacion(ubicacion);
+        l.setCapacidad(cap);
+
+        try {
+            LugarDAO dao = new LugarDAO();
+            dao.modificarLugar(l);
+            cargarTabla();
+            limpiarCampos();
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
     }//GEN-LAST:event_btnModificarActionPerformed
 
     private void txtNombreKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtNombreKeyTyped
@@ -201,6 +306,20 @@ public class VistaLugar extends javax.swing.JInternalFrame {
         if (txtUbicacion.getText().length() >= 50)
             evt.consume();
     }//GEN-LAST:event_txtUbicacionKeyTyped
+
+    private void tablaLugaresMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaLugaresMouseClicked
+        int fila = tablaLugares.getSelectedRow();
+        if (fila >= 0) {
+            try {
+                idLugarSeleccionado = Long.parseLong(tablaLugares.getValueAt(fila, 0).toString());
+                txtNombre.setText(tablaLugares.getValueAt(fila, 1).toString());
+                txtUbicacion.setText(tablaLugares.getValueAt(fila, 2).toString());
+                capacidad.setValue(Integer.parseInt(tablaLugares.getValueAt(fila, 3).toString()));
+            } catch (Exception ex) {
+                limpiarCampos();
+            }
+        }
+    }//GEN-LAST:event_tablaLugaresMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
