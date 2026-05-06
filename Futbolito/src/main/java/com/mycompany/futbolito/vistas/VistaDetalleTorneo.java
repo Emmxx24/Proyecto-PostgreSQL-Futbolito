@@ -4,17 +4,104 @@
  */
 package com.mycompany.futbolito.vistas;
 
+import com.mycompany.futbolito.dao.DetalleTorneoDAO;
+import com.mycompany.futbolito.utilidades.ManejadorErroresBD;
+import javax.swing.JOptionPane;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author Usuario
  */
 public class VistaDetalleTorneo extends javax.swing.JInternalFrame {
-
+    // Listas paralelas para guardar los IDs de los ComboBoxes
+    private List<Long> idsTorneos = new ArrayList<>();
+    private List<Long> idsEquipos = new ArrayList<>();
+    
+    // Guardamos la llave primaria compuesta anterior para el UPDATE
+    private long idTorneoViejo = -1;
+    private long idEquipoViejo = -1;
+    
     /**
      * Creates new form VistaDetalleTorneo
      */
     public VistaDetalleTorneo() {
         initComponents();
+        
+        tablaDetalleTorneo.setRowHeight(30);
+        
+        cargarCombos();
+        cargarTabla();
+        limpiarCampos();
+    }
+    
+    private void cargarCombos() {
+        try {
+            DetalleTorneoDAO dao = new DetalleTorneoDAO();
+            
+            // Cargar Torneos
+            cbTorneo.removeAllItems();
+            idsTorneos.clear();
+            for (DetalleTorneoDAO.ItemCombo item : dao.obtenerTorneosCombo()) {
+                cbTorneo.addItem(item.texto);
+                idsTorneos.add(item.id);
+            }
+            cbTorneo.setSelectedIndex(-1);
+            
+            // Cargar Equipos
+            cbEquipo.removeAllItems();
+            idsEquipos.clear();
+            for (DetalleTorneoDAO.ItemCombo item : dao.obtenerEquiposCombo()) {
+                cbEquipo.addItem(item.texto);
+                idsEquipos.add(item.id);
+            }
+            cbEquipo.setSelectedIndex(-1);
+            
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }
+
+    private void cargarTabla() {
+        try {
+            DetalleTorneoDAO dao = new DetalleTorneoDAO();
+            tablaDetalleTorneo.setModel(dao.obtenerModeloDetalleTorneo());
+            
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaDetalleTorneo);
+            
+            // Ocultar las columnas técnicas tal como en tu C#
+            int[] columnasOcultas = {0, 1, 4, 5};
+            for (int col : columnasOcultas) {
+                tablaDetalleTorneo.getColumnModel().getColumn(col).setMinWidth(0);
+                tablaDetalleTorneo.getColumnModel().getColumn(col).setMaxWidth(0);
+                tablaDetalleTorneo.getColumnModel().getColumn(col).setWidth(0);
+            }
+            
+            tablaDetalleTorneo.getTableHeader().setReorderingAllowed(false);
+            
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }
+
+    private void limpiarCampos() {
+        cbTorneo.setSelectedIndex(-1);
+        cbEquipo.setSelectedIndex(-1);
+        idTorneoViejo = -1;
+        idEquipoViejo = -1;
+    }
+
+    // Método para refrescar el formulario de Jornadas si está abierto en el menú principal
+    private void notificarCambioAJornada() {
+        if (this.getDesktopPane() != null) {
+            for (javax.swing.JInternalFrame frame : this.getDesktopPane().getAllFrames()) {
+                if (frame instanceof VistaJornada) {
+                    ((VistaJornada) frame).cargarTabla();
+                    break;
+                }
+            }
+        }
     }
 
     /**
@@ -52,12 +139,15 @@ public class VistaDetalleTorneo extends javax.swing.JInternalFrame {
 
         btnAgregar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnAgregar.setText("Agregar");
+        btnAgregar.addActionListener(this::btnAgregarActionPerformed);
 
         btnModificar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnModificar.setText("Modificar");
+        btnModificar.addActionListener(this::btnModificarActionPerformed);
 
         btnEliminar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnEliminar.setText("Eliminar");
+        btnEliminar.addActionListener(this::btnEliminarActionPerformed);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -114,6 +204,11 @@ public class VistaDetalleTorneo extends javax.swing.JInternalFrame {
 
             }
         ));
+        tablaDetalleTorneo.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tablaDetalleTorneoMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tablaDetalleTorneo);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -150,6 +245,108 @@ public class VistaDetalleTorneo extends javax.swing.JInternalFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnAgregarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarActionPerformed
+        if (cbTorneo.getSelectedIndex() == -1 || cbEquipo.getSelectedIndex() == -1) {
+            JOptionPane.showMessageDialog(this, "Debe seleccionar un torneo y un equipo", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        long idTorneoNuevo = idsTorneos.get(cbTorneo.getSelectedIndex());
+        long idEquipoNuevo = idsEquipos.get(cbEquipo.getSelectedIndex());
+
+        try {
+            DetalleTorneoDAO dao = new DetalleTorneoDAO();
+            
+            if (dao.existeDetalle(idTorneoNuevo, idEquipoNuevo)) {
+                JOptionPane.showMessageDialog(this, "Este equipo ya está inscrito en el torneo", "Atención", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            dao.insertarDetalle(idTorneoNuevo, idEquipoNuevo);
+            
+            cargarTabla();
+            limpiarCampos();
+            notificarCambioAJornada(); // Actualizamos la vista de Jornada
+            
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }//GEN-LAST:event_btnAgregarActionPerformed
+
+    private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
+        if (idTorneoViejo == -1 || idEquipoViejo == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un registro", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (cbTorneo.getSelectedIndex() == -1 || cbEquipo.getSelectedIndex() == -1) {
+            JOptionPane.showMessageDialog(this, "Debe seleccionar un torneo y un equipo", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        long idTorneoNuevo = idsTorneos.get(cbTorneo.getSelectedIndex());
+        long idEquipoNuevo = idsEquipos.get(cbEquipo.getSelectedIndex());
+
+        try {
+            DetalleTorneoDAO dao = new DetalleTorneoDAO();
+            
+            if (dao.existeDetalleModificar(idTorneoNuevo, idEquipoNuevo, idTorneoViejo, idEquipoViejo)) {
+                JOptionPane.showMessageDialog(this, "Ya existe ese equipo en ese torneo", "Atención", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            dao.modificarDetalle(idTorneoNuevo, idEquipoNuevo, idTorneoViejo, idEquipoViejo);
+            
+            cargarTabla();
+            limpiarCampos();
+            notificarCambioAJornada();
+            
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }//GEN-LAST:event_btnModificarActionPerformed
+
+    private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
+        if (idTorneoViejo == -1 || idEquipoViejo == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un registro", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            DetalleTorneoDAO dao = new DetalleTorneoDAO();
+            dao.eliminarDetalle(idTorneoViejo, idEquipoViejo);
+            
+            cargarTabla();
+            limpiarCampos();
+            notificarCambioAJornada();
+            
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }//GEN-LAST:event_btnEliminarActionPerformed
+
+    private void tablaDetalleTorneoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaDetalleTorneoMouseClicked
+        int fila = tablaDetalleTorneo.getSelectedRow();
+        if (fila >= 0) {
+            try {
+                // Sacamos los IDs de la tabla (columnas ocultas 0 y 1)
+                idTorneoViejo = Long.parseLong(tablaDetalleTorneo.getValueAt(fila, 0).toString());
+                idEquipoViejo = Long.parseLong(tablaDetalleTorneo.getValueAt(fila, 1).toString());
+                
+                // Buscamos en qué índice de nuestras listas paralelas están estos IDs
+                int indexTorneo = idsTorneos.indexOf(idTorneoViejo);
+                int indexEquipo = idsEquipos.indexOf(idEquipoViejo);
+                
+                // Asignamos esos índices a los ComboBox
+                if (indexTorneo != -1) cbTorneo.setSelectedIndex(indexTorneo);
+                if (indexEquipo != -1) cbEquipo.setSelectedIndex(indexEquipo);
+                
+            } catch (Exception ex) {
+                limpiarCampos();
+            }
+        }
+    }//GEN-LAST:event_tablaDetalleTorneoMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

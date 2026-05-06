@@ -7,6 +7,16 @@ CREATE DATABASE "Futbolito"
     CONNECTION LIMIT = -1
     IS_TEMPLATE = False;
 
+
+/* 1. Creación de la Base de Datos */
+CREATE DATABASE "Futbolito"
+    WITH
+    OWNER = postgres
+    ENCODING = 'UTF8'
+    LOCALE_PROVIDER = 'libc'
+    CONNECTION LIMIT = -1
+    IS_TEMPLATE = False;
+
 /* 2. Creación de Esquemas */
 CREATE SCHEMA Persona;
 CREATE SCHEMA Juego;
@@ -227,9 +237,13 @@ BEGIN
     -- Contar equipos actuales
     SELECT COUNT(*) INTO v_total FROM Juego.DetalleTorneo WHERE IdTorneo = v_idTorneo;
 
-    -- Calcular jornadas
-    IF v_total % 2 = 0 THEN v_jornadas := v_total - 1;
-    ELSE v_jornadas := v_total;
+    -- Calcular jornadas (AQUÍ ESTÁ EL PARCHE DEL BUG)
+    IF v_total = 0 THEN 
+        v_jornadas := 0;
+    ELSIF v_total % 2 = 0 THEN 
+        v_jornadas := v_total - 1;
+    ELSE 
+        v_jornadas := v_total;
     END IF;
 
     -- Actualizar Torneo

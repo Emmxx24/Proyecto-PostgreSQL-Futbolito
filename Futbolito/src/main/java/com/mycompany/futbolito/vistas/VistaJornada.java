@@ -4,6 +4,9 @@
  */
 package com.mycompany.futbolito.vistas;
 
+import com.mycompany.futbolito.dao.JornadaDAO;
+import com.mycompany.futbolito.utilidades.ManejadorErroresBD;
+
 /**
  *
  * @author Usuario
@@ -15,8 +18,34 @@ public class VistaJornada extends javax.swing.JInternalFrame {
      */
     public VistaJornada() {
         initComponents();
+        
+        // Ajustamos la altura de las filas para consistencia visual con el resto del proyecto
+        jTable1.setRowHeight(30); 
+        
+        cargarTabla();
     }
 
+    public void cargarTabla() {
+        try {
+            JornadaDAO dao = new JornadaDAO();
+            jTable1.setModel(dao.obtenerModeloJornadas());
+            
+            // Auto-ajustamos las columnas usando tu clase de utilidades
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(jTable1);
+            
+            // Ocultamos la columna técnica (IdJornada)
+            jTable1.getColumnModel().getColumn(0).setMinWidth(0);
+            jTable1.getColumnModel().getColumn(0).setMaxWidth(0);
+            jTable1.getColumnModel().getColumn(0).setWidth(0);
+            
+            // Evitamos que el usuario ande moviendo las columnas de lugar
+            jTable1.getTableHeader().setReorderingAllowed(false);
+            
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
