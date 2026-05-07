@@ -32,7 +32,7 @@ public class ArbitroDAO {
         // Agregamos el IdParticipante oculto en la posición 0
         modelo.addColumn("IdParticipante"); 
         modelo.addColumn("ID Árbitro");
-        modelo.addColumn("Nombre");
+        modelo.addColumn("Participante");
         modelo.addColumn("Cédula Profesional");
 
         ClaseConexion objetoConexion = new ClaseConexion();

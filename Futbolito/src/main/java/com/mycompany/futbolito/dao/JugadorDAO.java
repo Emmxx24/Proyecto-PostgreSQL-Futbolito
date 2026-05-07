@@ -31,7 +31,7 @@ public class JugadorDAO {
         // Agregamos las columnas igual que en tu C#
         modelo.addColumn("ID Jugador"); // Esta la vamos a ocultar visualmente
         modelo.addColumn("ID Participante");
-        modelo.addColumn("Nombre (Edad)");
+        modelo.addColumn("Participante");
         modelo.addColumn("Posición");
         modelo.addColumn("Número");
         modelo.addColumn("Tipo Sangre");

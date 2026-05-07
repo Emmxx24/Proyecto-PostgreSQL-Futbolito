@@ -63,6 +63,7 @@ public class VistaDetalleEquipo extends javax.swing.JInternalFrame {
             tablaDetalleEquipo.setModel(dao.obtenerModeloDetalleEquipo());
             com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaDetalleEquipo);
             
+            // Ocultamos solo las columnas de los IDs
             tablaDetalleEquipo.getColumnModel().getColumn(0).setMinWidth(0);
             tablaDetalleEquipo.getColumnModel().getColumn(0).setMaxWidth(0);
             tablaDetalleEquipo.getColumnModel().getColumn(0).setWidth(0);
@@ -106,7 +107,7 @@ public class VistaDetalleEquipo extends javax.swing.JInternalFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         tablaDetalleEquipo = new javax.swing.JTable();
 
-        jPanel1.setBackground(new java.awt.Color(102, 255, 102));
+        setTitle("DetalleEquipo");
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel1.setText("Equipo:");
@@ -130,49 +131,6 @@ public class VistaDetalleEquipo extends javax.swing.JInternalFrame {
         btnEliminar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnEliminar.setText("Eliminar");
         btnEliminar.addActionListener(this::btnEliminarActionPerformed);
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel1)
-                    .addComponent(jLabel2)
-                    .addComponent(cbEquipo, 0, 400, Short.MAX_VALUE)
-                    .addComponent(cbJugador, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(btnEliminar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnModificar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnAgregar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(59, 59, 59))
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel1)
-                .addGap(13, 13, 13)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cbEquipo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnAgregar))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel2)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cbJugador, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(14, 14, 14)
-                        .addComponent(btnModificar)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 45, Short.MAX_VALUE)
-                .addComponent(btnEliminar)
-                .addGap(28, 28, 28))
-        );
-
-        jPanel2.setBackground(new java.awt.Color(102, 0, 102));
 
         tablaDetalleEquipo.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         tablaDetalleEquipo.setModel(new javax.swing.table.DefaultTableModel(
@@ -199,7 +157,7 @@ public class VistaDetalleEquipo extends javax.swing.JInternalFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 977, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 965, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -210,19 +168,65 @@ public class VistaDetalleEquipo extends javax.swing.JInternalFrame {
                 .addContainerGap())
         );
 
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel1)
+                            .addComponent(jLabel2)
+                            .addComponent(cbEquipo, 0, 400, Short.MAX_VALUE)
+                            .addComponent(cbJugador, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 416, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(btnEliminar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnModificar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnAgregar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(59, 59, 59))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel1)
+                .addGap(13, 13, 13)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cbEquipo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnAgregar))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel2)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cbJugador, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(14, 14, 14)
+                        .addComponent(btnModificar)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 45, Short.MAX_VALUE)
+                .addComponent(btnEliminar)
+                .addGap(18, 18, 18)
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(10, Short.MAX_VALUE))
         );
 
         pack();
@@ -234,18 +238,19 @@ public class VistaDetalleEquipo extends javax.swing.JInternalFrame {
             return;
         }
 
-        DetalleEquipoDAO.ItemEquipo equipoSel = listaEquipos.get(cbEquipo.getSelectedIndex());
+        long idEquipoNuevo = listaEquipos.get(cbEquipo.getSelectedIndex()).idEquipo;
         long idJugadorNuevo = listaJugadores.get(cbJugador.getSelectedIndex()).idJugador;
 
         try {
             DetalleEquipoDAO dao = new DetalleEquipoDAO();
-            String errorValidacion = dao.validarInscripcion(equipoSel.idTorneo, equipoSel.idEquipo, idJugadorNuevo, -1, -1);
+            
+            String errorValidacion = dao.validarInscripcion(idEquipoNuevo, idJugadorNuevo, -1, -1);
             if (errorValidacion != null) {
                 JOptionPane.showMessageDialog(this, errorValidacion, "Atención", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            dao.insertarDetalle(equipoSel.idEquipo, idJugadorNuevo);
+            dao.insertarDetalle(idEquipoNuevo, idJugadorNuevo);
             cargarTabla();
             limpiarCampos();
         } catch (Exception ex) {
@@ -264,18 +269,19 @@ public class VistaDetalleEquipo extends javax.swing.JInternalFrame {
             return;
         }
 
-        DetalleEquipoDAO.ItemEquipo equipoSel = listaEquipos.get(cbEquipo.getSelectedIndex());
+        long idEquipoNuevo = listaEquipos.get(cbEquipo.getSelectedIndex()).idEquipo;
         long idJugadorNuevo = listaJugadores.get(cbJugador.getSelectedIndex()).idJugador;
 
         try {
             DetalleEquipoDAO dao = new DetalleEquipoDAO();
-            String errorValidacion = dao.validarInscripcion(equipoSel.idTorneo, equipoSel.idEquipo, idJugadorNuevo, idEquipoViejo, idJugadorViejo);
+            
+            String errorValidacion = dao.validarInscripcion(idEquipoNuevo, idJugadorNuevo, idEquipoViejo, idJugadorViejo);
             if (errorValidacion != null) {
                 JOptionPane.showMessageDialog(this, errorValidacion, "Atención", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            dao.modificarDetalle(equipoSel.idEquipo, idJugadorNuevo, idEquipoViejo, idJugadorViejo);
+            dao.modificarDetalle(idEquipoNuevo, idJugadorNuevo, idEquipoViejo, idJugadorViejo);
             cargarTabla();
             limpiarCampos();
         } catch (Exception ex) {
@@ -306,6 +312,7 @@ public class VistaDetalleEquipo extends javax.swing.JInternalFrame {
                 idEquipoViejo = Long.parseLong(tablaDetalleEquipo.getValueAt(fila, 0).toString());
                 idJugadorViejo = Long.parseLong(tablaDetalleEquipo.getValueAt(fila, 1).toString());
                 
+                // Lógica de búsqueda simple por ID
                 int indexEquipo = -1;
                 for (int i = 0; i < listaEquipos.size(); i++) {
                     if (listaEquipos.get(i).idEquipo == idEquipoViejo) { indexEquipo = i; break; }

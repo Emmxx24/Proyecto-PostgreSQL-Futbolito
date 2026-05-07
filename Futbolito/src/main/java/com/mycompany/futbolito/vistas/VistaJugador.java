@@ -63,9 +63,9 @@ public class VistaJugador extends javax.swing.JInternalFrame {
             com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaJugadores);
             
             // TRUCO: Ocultar la columna "IdParticipante" (Índice 0) para que no se vea
-            //tablaJugadores.getColumnModel().getColumn(0).setMinWidth(0);
-            //tablaJugadores.getColumnModel().getColumn(0).setMaxWidth(0);
-            //tablaJugadores.getColumnModel().getColumn(0).setWidth(0);
+            tablaJugadores.getColumnModel().getColumn(1).setMinWidth(0);
+            tablaJugadores.getColumnModel().getColumn(1).setMaxWidth(0);
+            tablaJugadores.getColumnModel().getColumn(1).setWidth(0);
             
             tablaJugadores.getTableHeader().setReorderingAllowed(false);
         } catch (Exception ex) {
@@ -109,7 +109,7 @@ public class VistaJugador extends javax.swing.JInternalFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         tablaJugadores = new javax.swing.JTable();
 
-        panelInputs.setBackground(new java.awt.Color(255, 102, 102));
+        setTitle("Jugador");
 
         lblParticipante.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         lblParticipante.setText("Participante:");
@@ -146,8 +146,6 @@ public class VistaJugador extends javax.swing.JInternalFrame {
         btnEliminar.setText("Eliminar");
         btnEliminar.addActionListener(this::btnEliminarActionPerformed);
 
-        jPanel1.setBackground(new java.awt.Color(51, 204, 0));
-
         tablaJugadores.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         tablaJugadores.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -181,8 +179,8 @@ public class VistaJugador extends javax.swing.JInternalFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 442, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 463, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout panelInputsLayout = new javax.swing.GroupLayout(panelInputs);
@@ -241,9 +239,9 @@ public class VistaJugador extends javax.swing.JInternalFrame {
                     .addComponent(btnEliminar))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cbTipoSangre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addContainerGap(20, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
