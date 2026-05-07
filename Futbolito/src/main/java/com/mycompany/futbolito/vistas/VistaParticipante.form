@@ -33,11 +33,6 @@
   </Layout>
   <SubComponents>
     <Container class="javax.swing.JPanel" name="panelInputs">
-      <Properties>
-        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-          <Color blue="0" green="66" red="cc" type="rgb"/>
-        </Property>
-      </Properties>
 
       <Layout>
         <DimensionLayout dim="0">
@@ -251,11 +246,6 @@
         <Component class="com.toedter.calendar.JCalendar" name="calendario">
         </Component>
         <Container class="javax.swing.JPanel" name="panelDatos">
-          <Properties>
-            <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="33" green="33" red="ff" type="rgb"/>
-            </Property>
-          </Properties>
 
           <Layout>
             <DimensionLayout dim="0">

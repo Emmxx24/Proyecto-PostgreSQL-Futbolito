@@ -87,8 +87,6 @@ public class VistaParticipante extends javax.swing.JInternalFrame {
         btnRegJug = new javax.swing.JButton();
         btnRegArb = new javax.swing.JButton();
 
-        panelInputs.setBackground(new java.awt.Color(204, 102, 0));
-
         jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel1.setText("Nombre:");
 
@@ -139,8 +137,6 @@ public class VistaParticipante extends javax.swing.JInternalFrame {
         btnEliminar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnEliminar.setText("Eliminar");
         btnEliminar.addActionListener(this::btnEliminarActionPerformed);
-
-        panelDatos.setBackground(new java.awt.Color(255, 51, 51));
 
         tablaParticipantes.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         tablaParticipantes.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N

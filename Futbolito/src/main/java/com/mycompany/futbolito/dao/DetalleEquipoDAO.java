@@ -54,7 +54,7 @@ public class DetalleEquipoDAO {
         String sql = "SELECT j.IdJugador, CONCAT(j.IdJugador, ' - ', p.NombreParticipante, ' [', j.Posicion, ' - ', j.Numero, ']') AS NombreJugador " +
                      "FROM Persona.Jugador j " +
                      "INNER JOIN Persona.Participante p ON j.IdParticipante = p.IdParticipante " +
-                     "ORDER BY j.IdJugador";
+                     "ORDER BY p.NombreParticipante";
         PreparedStatement ps = cn.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
 
@@ -81,7 +81,7 @@ public class DetalleEquipoDAO {
                      "INNER JOIN Club.Equipo e ON de.IdEquipo = e.IdEquipo " +
                      "INNER JOIN Persona.Jugador j ON de.IdJugador = j.IdJugador " +
                      "INNER JOIN Persona.Participante p ON j.IdParticipante = p.IdParticipante " +
-                     "ORDER BY e.NombreEquipo, j.IdJugador";
+                     "ORDER BY e.NombreEquipo, j.Numero";
                      
         PreparedStatement ps = cn.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
