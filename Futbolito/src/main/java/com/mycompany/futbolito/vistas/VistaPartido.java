@@ -106,6 +106,12 @@ public class VistaPartido extends javax.swing.JInternalFrame {
         spinnerHora.setValue(cal.getTime());
         
         idPartidoSeleccionado = -1;
+        actualizarBotones(false);
+    }
+    
+    private void actualizarBotones(boolean mostrar) {
+        btnRegResultado.setEnabled(mostrar);
+        btnRegResultado.setVisible(mostrar);
     }
     
     private void actualizarEquiposPorJornada() {
@@ -222,6 +228,7 @@ public class VistaPartido extends javax.swing.JInternalFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         tablaPartidos = new javax.swing.JTable();
         spinnerHora = new javax.swing.JSpinner();
+        btnRegResultado = new javax.swing.JButton();
 
         setTitle("Partido");
         try {
@@ -307,11 +314,15 @@ public class VistaPartido extends javax.swing.JInternalFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 358, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 338, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         spinnerHora.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+
+        btnRegResultado.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        btnRegResultado.setText("Registrar resultado");
+        btnRegResultado.addActionListener(this::btnRegResultadoActionPerformed);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -320,6 +331,10 @@ public class VistaPartido extends javax.swing.JInternalFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addComponent(btnRegResultado)
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -388,8 +403,7 @@ public class VistaPartido extends javax.swing.JInternalFrame {
                             .addComponent(spinnerHora)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGap(0, 0, Short.MAX_VALUE)
-                                .addComponent(fecha, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(58, 58, 58))
+                                .addComponent(fecha, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(71, 71, 71)
                         .addComponent(btnAgregar)
@@ -397,9 +411,12 @@ public class VistaPartido extends javax.swing.JInternalFrame {
                         .addComponent(btnModificar)
                         .addGap(34, 34, 34)
                         .addComponent(btnEliminar)
-                        .addGap(18, 18, 18)))
+                        .addGap(68, 68, 68)))
+                .addGap(18, 18, 18)
                 .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnRegResultado)
+                .addGap(17, 17, 17))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -532,18 +549,23 @@ public class VistaPartido extends javax.swing.JInternalFrame {
                 
                 fecha.setDate(new java.util.Date(fechaSQL.getTime()));
                 spinnerHora.setValue(new java.util.Date(horaSQL.getTime())); 
-                
+                actualizarBotones(true);
             } catch (Exception ex) {
                 limpiarCampos();
             }
         }
     }//GEN-LAST:event_tablaPartidosMouseClicked
 
+    private void btnRegResultadoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegResultadoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnRegResultadoActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAgregar;
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnModificar;
+    private javax.swing.JButton btnRegResultado;
     private javax.swing.JComboBox<String> cbArbitro;
     private javax.swing.JComboBox<String> cbEquiLoc;
     private javax.swing.JComboBox<String> cbEquiVisi;
