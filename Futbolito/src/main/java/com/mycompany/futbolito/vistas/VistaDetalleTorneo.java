@@ -125,7 +125,7 @@ public class VistaDetalleTorneo extends javax.swing.JInternalFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         tablaDetalleTorneo = new javax.swing.JTable();
 
-        jPanel1.setBackground(new java.awt.Color(153, 153, 255));
+        setTitle("DetalleTorneo");
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel1.setText("Torneo:");
@@ -189,8 +189,6 @@ public class VistaDetalleTorneo extends javax.swing.JInternalFrame {
                 .addComponent(btnEliminar)
                 .addGap(37, 37, 37))
         );
-
-        jPanel2.setBackground(new java.awt.Color(204, 0, 51));
 
         tablaDetalleTorneo.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         tablaDetalleTorneo.setModel(new javax.swing.table.DefaultTableModel(
