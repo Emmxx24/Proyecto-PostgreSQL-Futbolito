@@ -557,7 +557,36 @@ public class VistaPartido extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_tablaPartidosMouseClicked
 
     private void btnRegResultadoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegResultadoActionPerformed
-        // TODO add your handling code here:
+        if (idPartidoSeleccionado != -1) {
+                try {
+                    // 1. Instanciamos la vista de Resultado con el ID del partido seleccionado
+                    VistaResultadoPartido ventanaResultado = new VistaResultadoPartido(idPartidoSeleccionado);
+
+                    // 2. Extraemos el escritorio padre (JDesktopPane)
+                    javax.swing.JDesktopPane escritorio = this.getDesktopPane();
+
+                    if (escritorio != null) {
+                        // 3. Limpiamos el escritorio (esto elimina VistaPartido y cualquier otra ventana abierta)
+                        escritorio.removeAll();
+                        escritorio.repaint();
+
+                        // 4. Agregamos la de Resultado y la mostramos
+                        escritorio.add(ventanaResultado);
+                        ventanaResultado.setVisible(true);
+
+                        // 5. Intentamos maximizarla para que ocupe todo el espacio disponible
+                        try {
+                            ventanaResultado.setMaximum(true);
+                        } catch (java.beans.PropertyVetoException e) {
+                            // Si el sistema no permite maximizar, simplemente se queda con su tamaño por defecto
+                        }
+                    }
+                } catch (Exception ex) {
+                    ManejadorErroresBD.mostrarErrorAmigable(ex);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Selecciona un partido de la tabla primero.", "Atención", JOptionPane.WARNING_MESSAGE);
+            }
     }//GEN-LAST:event_btnRegResultadoActionPerformed
 
 

@@ -4,19 +4,114 @@
  */
 package com.mycompany.futbolito.vistas;
 
+import com.mycompany.futbolito.dao.ResultadoPartidoDAO;
+import com.mycompany.futbolito.utilidades.ManejadorErroresBD;
+import javax.swing.JOptionPane;
+import java.util.Date;
+import java.util.Calendar;
+import javax.swing.SpinnerDateModel;
+import javax.swing.JSpinner;
+
 /**
  *
  * @author Usuario
  */
 public class VistaResultadoPartido extends javax.swing.JInternalFrame {
 
+    private long idResultadoSeleccionado = -1;
+    private long idPartidoFK = -1; // El partido que nos pasan desde la otra ventana
+    private long idPartidoSeleccionado = -1; // Para la modificación
     /**
      * Creates new form VistaResultadoPartido
      */
     public VistaResultadoPartido() {
         initComponents();
+        configurarVentana();
     }
 
+    // Constructor SOBRECARGADO para cuando lo llamemos desde VistaPartido
+    public VistaResultadoPartido(long idPartidoRecibido) {
+        initComponents();
+        configurarVentana();
+        
+        this.idPartidoFK = idPartidoRecibido;
+        try {
+            ResultadoPartidoDAO dao = new ResultadoPartidoDAO();
+            txtEquipo.setText(dao.obtenerDetallePartido(this.idPartidoFK));
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }
+
+    private void configurarVentana() {
+        // Configuramos la hora
+        horaTermino.setModel(new SpinnerDateModel());
+        JSpinner.DateEditor timeEditor = new JSpinner.DateEditor(horaTermino, "HH:mm");
+        horaTermino.setEditor(timeEditor);
+
+        // Bloqueamos los goles (Requisito de la maestra de iniciar siempre en 0)
+        golesLocal.setValue(0);
+        golesLocal.setEnabled(false);
+        golesVisitante.setValue(0);
+        golesVisitante.setEnabled(false);
+
+        tablaPartidos.setRowHeight(30);
+
+        cargarTabla();
+        limpiarCampos();
+    }
+
+    private void cargarTabla() {
+        try {
+            ResultadoPartidoDAO dao = new ResultadoPartidoDAO();
+            tablaPartidos.setModel(dao.obtenerModeloResultados());
+            
+            
+            // Ocultamos IdResultado e IdPartido
+            /*tablaPartidos.getColumnModel().getColumn(0).setMinWidth(0);
+            tablaPartidos.getColumnModel().getColumn(0).setMaxWidth(0);
+            tablaPartidos.getColumnModel().getColumn(0).setWidth(0);*/
+            
+            tablaPartidos.getColumnModel().getColumn(1).setMinWidth(0);
+            tablaPartidos.getColumnModel().getColumn(1).setMaxWidth(0);
+            tablaPartidos.getColumnModel().getColumn(1).setWidth(0);
+            
+            tablaPartidos.getTableHeader().setReorderingAllowed(false);
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaPartidos);
+
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }
+
+    private void limpiarCampos() {
+        idResultadoSeleccionado = -1;
+        idPartidoSeleccionado = -1;
+        
+        // Si no nos pasaron un partido, limpiamos la caja
+        if (idPartidoFK == -1) {
+            txtEquipo.setText("");
+        }
+
+        golesLocal.setValue(0);
+        golesVisitante.setValue(0);
+        
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 14); // Hora por defecto 14:00
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0); 
+        horaTermino.setValue(cal.getTime());
+    }
+
+    private java.sql.Time extraerHoraLimpia() {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime((Date) horaTermino.getValue());
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return new java.sql.Time(cal.getTimeInMillis());
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -42,7 +137,7 @@ public class VistaResultadoPartido extends javax.swing.JInternalFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         tablaPartidos = new javax.swing.JTable();
 
-        jPanel1.setBackground(new java.awt.Color(102, 255, 102));
+        setTitle("ResultadoPartido");
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel1.setText("Partido:");
@@ -67,13 +162,52 @@ public class VistaResultadoPartido extends javax.swing.JInternalFrame {
 
         btnAgregar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnAgregar.setText("Agregar");
+        btnAgregar.addActionListener(this::btnAgregarActionPerformed);
 
         btnModificar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnModificar.setText("Modificar");
+        btnModificar.addActionListener(this::btnModificarActionPerformed);
 
         btnEliminar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnEliminar.setText("Eliminar");
         btnEliminar.setToolTipText("");
+        btnEliminar.addActionListener(this::btnEliminarActionPerformed);
+
+        tablaPartidos.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        tablaPartidos.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {},
+                {},
+                {},
+                {}
+            },
+            new String [] {
+
+            }
+        ));
+        tablaPartidos.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tablaPartidosMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(tablaPartidos);
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1)
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 427, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -93,15 +227,16 @@ public class VistaResultadoPartido extends javax.swing.JInternalFrame {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel3)
                             .addComponent(jLabel2)
-                            .addComponent(txtEquipo, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel4)
-                            .addComponent(horaTermino, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 510, Short.MAX_VALUE)
+                            .addComponent(horaTermino, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtEquipo, javax.swing.GroupLayout.PREFERRED_SIZE, 630, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 201, Short.MAX_VALUE)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(btnEliminar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(btnAgregar, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(btnModificar, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(67, 67, 67))))
+            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -132,39 +267,8 @@ public class VistaResultadoPartido extends javax.swing.JInternalFrame {
                         .addComponent(jLabel4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(horaTermino, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(21, Short.MAX_VALUE))
-        );
-
-        jPanel2.setBackground(new java.awt.Color(102, 0, 102));
-
-        tablaPartidos.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        tablaPartidos.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {},
-                {},
-                {},
-                {}
-            },
-            new String [] {
-
-            }
-        ));
-        jScrollPane1.setViewportView(tablaPartidos);
-
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane1)
-                .addContainerGap())
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 427, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -173,18 +277,107 @@ public class VistaResultadoPartido extends javax.swing.JInternalFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnAgregarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarActionPerformed
+        if (idPartidoFK == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un Partido desde el formulario de Partidos para agregar un resultado.", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        java.sql.Time sqlHoraFin = extraerHoraLimpia();
+
+        try {
+            ResultadoPartidoDAO dao = new ResultadoPartidoDAO();
+            
+            if (dao.verificaHoraFinInicio(idPartidoFK, sqlHoraFin)) {
+                JOptionPane.showMessageDialog(this, "La hora de término no puede ser antes o igual a la de inicio del partido.", "Atención", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            dao.insertarResultado(idPartidoFK, sqlHoraFin);
+            cargarTabla();
+            
+            // Ya registrado, limpiamos el FK para obligar a seleccionar otro partido nuevo
+            idPartidoFK = -1; 
+            limpiarCampos();
+            
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }//GEN-LAST:event_btnAgregarActionPerformed
+
+    private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
+        if (idResultadoSeleccionado == -1) {
+            JOptionPane.showMessageDialog(this, "Selecciona un resultado de la tabla para modificar.", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        java.sql.Time sqlHoraFin = extraerHoraLimpia();
+
+        try {
+            ResultadoPartidoDAO dao = new ResultadoPartidoDAO();
+            
+            // Validamos contra el partido seleccionado de la fila
+            if (dao.verificaHoraFinInicio(idPartidoSeleccionado, sqlHoraFin)) {
+                JOptionPane.showMessageDialog(this, "La hora de término no puede ser antes o igual a la de inicio del partido.", "Atención", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            dao.modificarResultado(idResultadoSeleccionado, sqlHoraFin);
+            cargarTabla();
+            limpiarCampos();
+            
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }//GEN-LAST:event_btnModificarActionPerformed
+
+    private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
+        if (idResultadoSeleccionado == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un Resultado para eliminar", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        try {
+            ResultadoPartidoDAO dao = new ResultadoPartidoDAO();
+            dao.eliminarResultado(idResultadoSeleccionado);
+            cargarTabla();
+            limpiarCampos();
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }//GEN-LAST:event_btnEliminarActionPerformed
+
+    private void tablaPartidosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaPartidosMouseClicked
+        int fila = tablaPartidos.getSelectedRow();
+        if (fila >= 0) {
+            try {
+                idResultadoSeleccionado = Long.parseLong(tablaPartidos.getValueAt(fila, 0).toString());
+                idPartidoSeleccionado = Long.parseLong(tablaPartidos.getValueAt(fila, 1).toString());
+                
+                txtEquipo.setText(tablaPartidos.getValueAt(fila, 2).toString());
+                
+                // Estos spinners están bloqueados, pero actualizamos su valor para que se vean los goles actuales
+                golesLocal.setValue(Integer.parseInt(tablaPartidos.getValueAt(fila, 3).toString()));
+                golesVisitante.setValue(Integer.parseInt(tablaPartidos.getValueAt(fila, 4).toString()));
+                
+                java.sql.Time horaSQL = (java.sql.Time) tablaPartidos.getValueAt(fila, 5);
+                horaTermino.setValue(new java.util.Date(horaSQL.getTime())); 
+                
+            } catch (Exception ex) {
+                limpiarCampos();
+            }
+        }
+    }//GEN-LAST:event_tablaPartidosMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

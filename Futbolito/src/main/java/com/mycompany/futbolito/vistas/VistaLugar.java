@@ -110,6 +110,7 @@ public class VistaLugar extends javax.swing.JInternalFrame {
         capacidad.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         capacidad.setModel(new javax.swing.SpinnerNumberModel(1, 1, null, 1));
 
+        tablaLugares.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         tablaLugares.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {},

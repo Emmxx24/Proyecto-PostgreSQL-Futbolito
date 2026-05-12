@@ -201,6 +201,7 @@ CREATE TABLE Evento.Tarjeta (
         REFERENCES Evento.Partido (IdPartido)
 );
 
+
 /*Disparadores*/
 
 -- 1. Calcular Edad del Participante
@@ -307,3 +308,44 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER TR_DETALLEEQUIPO_CANTIDAD
 AFTER INSERT OR UPDATE OR DELETE ON Club.DetalleEquipo
 FOR EACH ROW EXECUTE FUNCTION Club.fn_tr_detalleequipo_cantidad();
+
+
+-- 4. Actualizamos el estado de partido y jugadores despues de insertar un resultado partido
+CREATE OR REPLACE FUNCTION Evento.fn_tr_resultado_actualizar_estados()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Si estamos insertando un resultado
+    IF (TG_OP = 'INSERT') THEN
+        -- A) El partido pasa a 'Jugado'
+        UPDATE Evento.Partido 
+        SET Estado = 'Jugado' 
+        WHERE IdPartido = NEW.IdPartido;
+
+        -- B) Los jugadores suspendidos de esos equipos pasan a 'Activo'
+        UPDATE Persona.Jugador
+        SET Estado = 'Activo'
+        FROM Club.DetalleEquipo de
+        INNER JOIN Evento.Partido p ON (de.IdEquipo = p.IdLocal OR de.IdEquipo = p.IdVisitante)
+        WHERE Persona.Jugador.IdJugador = de.IdJugador
+          AND p.IdPartido = NEW.IdPartido
+          AND Persona.Jugador.Estado = 'Suspendido';
+        
+        RETURN NEW;
+        
+    -- Si estamos eliminando un resultado, el partido regresa a 'Pendiente' 
+    ELSIF (TG_OP = 'DELETE') THEN
+        UPDATE Evento.Partido 
+        SET Estado = 'Pendiente' 
+        WHERE IdPartido = OLD.IdPartido;
+        
+        RETURN OLD;
+    END IF;
+    
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER TR_RESULTADO_ACTUALIZAR_ESTADOS
+AFTER INSERT OR DELETE ON Evento.ResultadoPartido
+FOR EACH ROW 
+EXECUTE FUNCTION Evento.fn_tr_resultado_actualizar_estados

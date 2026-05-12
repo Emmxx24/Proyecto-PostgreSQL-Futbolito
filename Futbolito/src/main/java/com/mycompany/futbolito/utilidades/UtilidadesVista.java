@@ -33,8 +33,8 @@ public class UtilidadesVista {
             int anchoFinal = Math.max(anchoCabecera, anchoMaximoDatos);
             
             // (Opcional) Ponemos un límite máximo para que una columna no ocupe toda la pantalla
-            if (anchoFinal > 300) {
-                anchoFinal = 300;
+            if (anchoFinal > 500) {
+                anchoFinal = 500;
             }
             
             // Aplicamos el ancho calculado
