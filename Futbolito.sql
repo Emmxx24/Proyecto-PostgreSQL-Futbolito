@@ -7,16 +7,6 @@ CREATE DATABASE "Futbolito"
     CONNECTION LIMIT = -1
     IS_TEMPLATE = False;
 
-
-/* 1. Creación de la Base de Datos */
-CREATE DATABASE "Futbolito"
-    WITH
-    OWNER = postgres
-    ENCODING = 'UTF8'
-    LOCALE_PROVIDER = 'libc'
-    CONNECTION LIMIT = -1
-    IS_TEMPLATE = False;
-
 /* 2. Creación de Esquemas */
 CREATE SCHEMA Persona;
 CREATE SCHEMA Juego;
@@ -349,3 +339,73 @@ CREATE TRIGGER TR_RESULTADO_ACTUALIZAR_ESTADOS
 AFTER INSERT OR DELETE ON Evento.ResultadoPartido
 FOR EACH ROW 
 EXECUTE FUNCTION Evento.fn_tr_resultado_actualizar_estados
+
+-- 5. Evitamos que se eliminen resultados si ya hay goles o tarjetas registradas
+CREATE OR REPLACE FUNCTION Evento.fn_tr_prevenir_borrar_resultado()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_goles INT;
+    v_tarjetas INT;
+BEGIN
+    SELECT COUNT(*) INTO v_goles FROM Evento.Gol WHERE IdPartido = OLD.IdPartido;
+    SELECT COUNT(*) INTO v_tarjetas FROM Evento.Tarjeta WHERE IdPartido = OLD.IdPartido;
+
+    IF (v_goles > 0 OR v_tarjetas > 0) THEN
+        RAISE EXCEPTION 'No puedes eliminar este resultado. Existen % goles y % tarjetas registrados.', v_goles, v_tarjetas;
+    END IF;
+
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS TR_PREVENIR_BORRAR_RESULTADO ON Evento.ResultadoPartido;
+CREATE TRIGGER TR_PREVENIR_BORRAR_RESULTADO
+BEFORE DELETE ON Evento.ResultadoPartido
+FOR EACH ROW EXECUTE FUNCTION Evento.fn_tr_prevenir_borrar_resultado();
+
+-- 6. Actualizamos el marcador de un resultado de partido en cada insercion/eliminacion
+CREATE OR REPLACE FUNCTION Evento.fn_tr_gol_actualizar_marcador()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_idPartido BIGINT;
+    v_golesLocal INT;
+    v_golesVisitante INT;
+    v_idLocal BIGINT;
+    v_idVisitante BIGINT;
+BEGIN
+    -- Saber de qué partido estamos hablando
+    IF (TG_OP = 'DELETE') THEN
+        v_idPartido := OLD.IdPartido;
+    ELSE
+        v_idPartido := NEW.IdPartido;
+    END IF;
+
+    -- Sacar quién es el Local y el Visitante
+    SELECT IdLocal, IdVisitante INTO v_idLocal, v_idVisitante
+    FROM Evento.Partido WHERE IdPartido = v_idPartido;
+
+    -- Contar goles del Local (cruzando Gol con DetalleEquipo para saber el equipo del anotador)
+    SELECT COUNT(*) INTO v_golesLocal
+    FROM Evento.Gol g
+    INNER JOIN Club.DetalleEquipo de ON g.IdJugador = de.IdJugador
+    WHERE g.IdPartido = v_idPartido AND de.IdEquipo = v_idLocal;
+
+    -- Contar goles del Visitante
+    SELECT COUNT(*) INTO v_golesVisitante
+    FROM Evento.Gol g
+    INNER JOIN Club.DetalleEquipo de ON g.IdJugador = de.IdJugador
+    WHERE g.IdPartido = v_idPartido AND de.IdEquipo = v_idVisitante;
+
+    -- Actualizar el marcador oficial
+    UPDATE Evento.ResultadoPartido
+    SET GolesLocal = v_golesLocal, GolesVisitante = v_golesVisitante
+    WHERE IdPartido = v_idPartido;
+
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS TR_GOL_ACTUALIZAR_MARCADOR ON Evento.Gol;
+CREATE TRIGGER TR_GOL_ACTUALIZAR_MARCADOR
+AFTER INSERT OR UPDATE OR DELETE ON Evento.Gol
+FOR EACH ROW EXECUTE FUNCTION Evento.fn_tr_gol_actualizar_marcador();

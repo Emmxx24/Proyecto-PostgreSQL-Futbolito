@@ -4,17 +4,80 @@
  */
 package com.mycompany.futbolito.vistas;
 
+import com.mycompany.futbolito.dao.GolDAO;
+import com.mycompany.futbolito.utilidades.ManejadorErroresBD;
+import javax.swing.JOptionPane;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author Usuario
  */
 public class VistaGol extends javax.swing.JInternalFrame {
 
-    /**
-     * Creates new form VistaGol
-     */
+    private long idGolSeleccionado = -1;
+    private long idPartidoFK = -1; // Desde Resultados
+    private long idPartidoSeleccionado = -1; // Desde la Tabla
+    private List<GolDAO.ItemCombo> listaJugadores = new ArrayList<>();
+
     public VistaGol() {
+        this(-1);
+    }
+
+    public VistaGol(long idPartido) {
         initComponents();
+        tablaGoles.setRowHeight(30);
+        tablaGoles.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tablaGolesMouseClicked(evt);
+            }
+        });
+        
+        cargarGoles();
+        limpiarElementos();
+        
+        if (idPartido != -1) {
+            this.idPartidoFK = idPartido;
+            cargaJugadores(idPartidoFK);
+            try {
+                GolDAO dao = new GolDAO();
+                jTextField1.setText(dao.obtenerDetallePartido(idPartidoFK));
+            } catch (Exception ex) { ManejadorErroresBD.mostrarErrorAmigable(ex); }
+        }
+    }
+
+    private void cargarGoles() {
+        try {
+            GolDAO dao = new GolDAO();
+            tablaGoles.setModel(dao.obtenerModeloGoles());
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaGoles);
+            
+            for (int i = 1; i <= 2; i++) {
+                tablaGoles.getColumnModel().getColumn(i).setMinWidth(0);
+                tablaGoles.getColumnModel().getColumn(i).setMaxWidth(0);
+                tablaGoles.getColumnModel().getColumn(i).setWidth(0);
+            }
+            tablaGoles.getTableHeader().setReorderingAllowed(false);
+        } catch (Exception ex) { ManejadorErroresBD.mostrarErrorAmigable(ex); }
+    }
+
+    private void cargaJugadores(long idPartido) {
+        try {
+            GolDAO dao = new GolDAO();
+            cbJugador.removeAllItems();
+            listaJugadores = dao.obtenerJugadoresCombo(idPartido);
+            for (GolDAO.ItemCombo i : listaJugadores) cbJugador.addItem(i.texto);
+            cbJugador.setSelectedIndex(-1);
+        } catch (Exception ex) { ManejadorErroresBD.mostrarErrorAmigable(ex); }
+    }
+
+    private void limpiarElementos() {
+        idGolSeleccionado = -1;
+        idPartidoSeleccionado = -1;
+        if (idPartidoFK == -1) jTextField1.setText("");
+        cbJugador.setSelectedIndex(-1);
+        minuto.setValue(0);
     }
 
     /**
@@ -54,12 +117,15 @@ public class VistaGol extends javax.swing.JInternalFrame {
 
         btnAgregar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnAgregar.setText("Agregar");
+        btnAgregar.addActionListener(this::btnAgregarActionPerformed);
 
         btnModificar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnModificar.setText("Modificar");
+        btnModificar.addActionListener(this::btnModificarActionPerformed);
 
         btnEliminar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnEliminar.setText("Eliminar");
+        btnEliminar.addActionListener(this::btnEliminarActionPerformed);
 
         minuto.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
 
@@ -68,6 +134,44 @@ public class VistaGol extends javax.swing.JInternalFrame {
 
         jTextField1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jTextField1.setEnabled(false);
+
+        jPanel2.setBackground(new java.awt.Color(153, 0, 51));
+
+        tablaGoles.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        tablaGoles.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {},
+                {},
+                {},
+                {}
+            },
+            new String [] {
+
+            }
+        ));
+        tablaGoles.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tablaGolesMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(tablaGoles);
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1)
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 480, Short.MAX_VALUE)
+                .addContainerGap())
+        );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -91,7 +195,8 @@ public class VistaGol extends javax.swing.JInternalFrame {
                         .addGap(41, 41, 41))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel3)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -117,40 +222,8 @@ public class VistaGol extends javax.swing.JInternalFrame {
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(minuto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(48, Short.MAX_VALUE))
-        );
-
-        jPanel2.setBackground(new java.awt.Color(153, 0, 51));
-
-        tablaGoles.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        tablaGoles.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {},
-                {},
-                {},
-                {}
-            },
-            new String [] {
-
-            }
-        ));
-        jScrollPane1.setViewportView(tablaGoles);
-
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane1)
-                .addContainerGap())
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 450, Short.MAX_VALUE)
-                .addContainerGap())
+                .addGap(18, 18, 18)
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -158,18 +231,123 @@ public class VistaGol extends javax.swing.JInternalFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnAgregarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarActionPerformed
+        if (idPartidoFK == -1) {
+            JOptionPane.showMessageDialog(this, "Selecciona un Resultado desde el formulario de CapturaResultado");
+            return;
+        }
+        if (cbJugador.getSelectedIndex() == -1 || (int)minuto.getValue() <= 0) {
+            JOptionPane.showMessageDialog(this, "Completa todos los campos/el minuto no puede ser 0");
+            return;
+        }
+
+        long idJugador = listaJugadores.get(cbJugador.getSelectedIndex()).id;
+        int min = (int) minuto.getValue();
+
+        try {
+            GolDAO dao = new GolDAO();
+            
+            if (dao.verificaMinuto(idPartidoFK, min) != 0) {
+                JOptionPane.showMessageDialog(this, "El minuto del gol no puede ser cero ni mayor a la duración del partido.");
+                return;
+            }
+
+            if (dao.verificaMinutoDuplicado(idPartidoFK, min, 0, 0) > 0) {
+                JOptionPane.showMessageDialog(this, "Ya existe un gol registrado en ese exacto minuto para este partido.");
+                return;
+            }
+
+            if (dao.verificaEstadoEnMinuto(idPartidoFK, idJugador, min) == 1) {
+                JOptionPane.showMessageDialog(this, "Este jugador está Suspendido, no se le puede registrar un Gol");
+                return;
+            }
+
+            dao.insertarGol(idJugador, idPartidoFK, min);
+            cargarGoles();
+            limpiarElementos();
+        } catch (Exception ex) { ManejadorErroresBD.mostrarErrorAmigable(ex); }
+    }//GEN-LAST:event_btnAgregarActionPerformed
+
+    private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
+        if (idGolSeleccionado == -1) {
+            JOptionPane.showMessageDialog(this, "Selecciona un Gol de la tabla para modificar");
+            return;
+        }
+        
+        long idPartidoAValidar = (idPartidoFK != -1) ? idPartidoFK : idPartidoSeleccionado;
+        long idJugador = listaJugadores.get(cbJugador.getSelectedIndex()).id;
+        int min = (int) minuto.getValue();
+
+        try {
+            GolDAO dao = new GolDAO();
+            
+            if (dao.verificaMinuto(idPartidoAValidar, min) != 0) {
+                JOptionPane.showMessageDialog(this, "El minuto del gol no puede ser cero ni mayor a la duración del partido.");
+                return;
+            }
+
+            if (dao.verificaMinutoDuplicado(idPartidoAValidar, min, idGolSeleccionado, 1) > 0) {
+                JOptionPane.showMessageDialog(this, "Ya existe un gol registrado en ese exacto minuto para este partido.");
+                return;
+            }
+
+            if (dao.verificaEstadoEnMinuto(idPartidoAValidar, idJugador, min) == 1) {
+                JOptionPane.showMessageDialog(this, "Este jugador está Suspendido, no se le puede registrar un Gol");
+                return;
+            }
+
+            dao.modificarGol(idGolSeleccionado, idJugador, min);
+            cargarGoles();
+            limpiarElementos();
+        } catch (Exception ex) { ManejadorErroresBD.mostrarErrorAmigable(ex); }
+    }//GEN-LAST:event_btnModificarActionPerformed
+
+    private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
+        if (idGolSeleccionado == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un Gol para eliminar");
+            return;
+        }
+        try {
+            GolDAO dao = new GolDAO();
+            dao.eliminarGol(idGolSeleccionado);
+            cargarGoles();
+            limpiarElementos();
+        } catch (Exception ex) { ManejadorErroresBD.mostrarErrorAmigable(ex); }
+    }//GEN-LAST:event_btnEliminarActionPerformed
+
+    private void tablaGolesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaGolesMouseClicked
+        int fila = tablaGoles.getSelectedRow();
+        if (fila >= 0) {
+            try {
+                idGolSeleccionado = Long.parseLong(tablaGoles.getValueAt(fila, 0).toString());
+                long idJugadorFila = Long.parseLong(tablaGoles.getValueAt(fila, 1).toString());
+                idPartidoSeleccionado = Long.parseLong(tablaGoles.getValueAt(fila, 2).toString());
+                
+                // Cargamos el detalle y los jugadores de ese partido específico
+                jTextField1.setText(tablaGoles.getValueAt(fila, 5).toString());
+                cargaJugadores(idPartidoSeleccionado);
+                
+                for (int i = 0; i < listaJugadores.size(); i++) {
+                    if (listaJugadores.get(i).id == idJugadorFila) {
+                        cbJugador.setSelectedIndex(i);
+                        break;
+                    }
+                }
+                minuto.setValue(Integer.parseInt(tablaGoles.getValueAt(fila, 6).toString()));
+            } catch (Exception ex) { limpiarElementos(); }
+        }
+    }//GEN-LAST:event_tablaGolesMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

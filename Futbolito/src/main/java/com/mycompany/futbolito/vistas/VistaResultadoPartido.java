@@ -102,6 +102,7 @@ public class VistaResultadoPartido extends javax.swing.JInternalFrame {
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0); 
         horaTermino.setValue(cal.getTime());
+        actualizarBotones(false);
     }
 
     private java.sql.Time extraerHoraLimpia() {
@@ -391,6 +392,7 @@ public class VistaResultadoPartido extends javax.swing.JInternalFrame {
                 
                 java.sql.Time horaSQL = (java.sql.Time) tablaPartidos.getValueAt(fila, 5);
                 horaTermino.setValue(new java.util.Date(horaSQL.getTime())); 
+                actualizarBotones(true);
                 
             } catch (Exception ex) {
                 limpiarCampos();
@@ -399,13 +401,35 @@ public class VistaResultadoPartido extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_tablaPartidosMouseClicked
 
     private void btnRegGolesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegGolesActionPerformed
-        // TODO add your handling code here:
+        VistaGol ventanaGol = new VistaGol(idPartidoSeleccionado);
+                
+                // 2. Extraes el escritorio padre
+                javax.swing.JDesktopPane escritorio = this.getDesktopPane();
+                
+                // 3. Limpias el escritorio (destruye VistaParticipante)
+                escritorio.removeAll();
+                escritorio.repaint();
+                
+                // 4. Agregas la de Jugador y la maximizas
+                escritorio.add(ventanaGol);
+                ventanaGol.setVisible(true);
+                try {
+                    ventanaGol.setMaximum(true);
+                } catch (Exception e) { }
     }//GEN-LAST:event_btnRegGolesActionPerformed
 
     private void btnRegTarjetasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegTarjetasActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_btnRegTarjetasActionPerformed
 
+    private void actualizarBotones(boolean mostrar) {
+        btnRegGoles.setEnabled(mostrar);
+        btnRegTarjetas.setEnabled(mostrar);
+        
+        btnRegGoles.setVisible(mostrar);
+        btnRegTarjetas.setVisible(mostrar);
+    }
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAgregar;
