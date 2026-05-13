@@ -51,7 +51,7 @@ public class DetalleEquipoDAO {
         String sql = "SELECT j.IdJugador, CONCAT(j.IdJugador, ' - ', p.NombreParticipante, ' [', j.Posicion, ' - ', j.Numero, ']') AS NombreJugador " +
                      "FROM Persona.Jugador j " +
                      "INNER JOIN Persona.Participante p ON j.IdParticipante = p.IdParticipante " +
-                     "ORDER BY p.NombreParticipante";
+                     "ORDER BY p.IdParticipante";
         PreparedStatement ps = cn.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
 

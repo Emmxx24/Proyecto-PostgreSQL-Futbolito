@@ -41,7 +41,7 @@ public class DetalleTorneoDAO {
         ClaseConexion objetoConexion = new ClaseConexion();
         Connection cn = objetoConexion.establecerConexion();
 
-        String sql = "SELECT IdEquipo, NombreEquipo FROM Club.Equipo ORDER BY IdEquipo";
+        String sql = "SELECT IdEquipo, NombreEquipo FROM Club.Equipo ORDER BY NombreEquipo";
         PreparedStatement ps = cn.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
 

@@ -105,8 +105,6 @@ public class VistaGol extends javax.swing.JInternalFrame {
 
         setTitle("Gol");
 
-        jPanel1.setBackground(new java.awt.Color(102, 255, 102));
-
         jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel1.setText("Jugador:");
 
@@ -134,8 +132,6 @@ public class VistaGol extends javax.swing.JInternalFrame {
 
         jTextField1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jTextField1.setEnabled(false);
-
-        jPanel2.setBackground(new java.awt.Color(153, 0, 51));
 
         tablaGoles.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         tablaGoles.setModel(new javax.swing.table.DefaultTableModel(

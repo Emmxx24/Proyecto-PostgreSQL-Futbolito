@@ -28,8 +28,8 @@ public class ResultadoPartidoDAO {
                      "INNER JOIN Evento.Partido p ON rp.IdPartido = p.IdPartido " +
                      "INNER JOIN Club.Equipo el ON p.IdLocal = el.IdEquipo " +
                      "INNER JOIN Club.Equipo ev ON p.IdVisitante = ev.IdEquipo " +
-                     "INNER JOIN Juego.Lugar l ON p.IdLugar = l.IdLugar "; //+
-                     //"ORDER BY rp.IdResultado DESC";
+                     "INNER JOIN Juego.Lugar l ON p.IdLugar = l.IdLugar " +
+                     "ORDER BY rp.IdResultado";
                      
         PreparedStatement ps = cn.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
