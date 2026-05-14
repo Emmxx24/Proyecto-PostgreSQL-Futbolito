@@ -9,6 +9,7 @@ import com.mycompany.futbolito.modelos.Jugador;
 import com.mycompany.futbolito.utilidades.ManejadorErroresBD;
 import javax.swing.JOptionPane;
 import com.mycompany.futbolito.utilidades.UtilidadesVista;
+import com.mycompany.futbolito.utilidades.SesionGlobal;
 
 /**
  *
@@ -28,20 +29,24 @@ public class VistaJugador extends javax.swing.JInternalFrame {
     }
 
     // CONSTRUCTOR 2: Desde VistaParticipante (Con ID)
-    public VistaJugador(long id){
+    public VistaJugador(long id) {
         initComponents();
         this.idParticipanteHeredado = id;
-        
+
         cargarTabla();
         limpiarCampos();
-        
+
         // Lógica de habilitar botón dependiendo de dónde se abrió
         if (idParticipanteHeredado != -1) {
             btnAgregar.setEnabled(true);
             cargarNombreForaneo(idParticipanteHeredado);
-        }/* else {
-            btnAgregar.setEnabled(false); // Desde el menú no se puede agregar
-        }*/
+        }
+
+        if (SesionGlobal.rol.equals("Arbitro") || SesionGlobal.rol.equals("Capturista")) {
+            btnAgregar.setVisible(false);
+            btnModificar.setVisible(false);
+            btnEliminar.setVisible(false);
+        }
     }
 
     private void cargarNombreForaneo(long id) {
@@ -58,15 +63,15 @@ public class VistaJugador extends javax.swing.JInternalFrame {
         try {
             JugadorDAO dao = new JugadorDAO();
             tablaJugadores.setModel(dao.obtenerModeloJugadores());
-            
+
             // ¡Aquí está tu función de autoajustar columnas!
             com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaJugadores);
-            
+
             // TRUCO: Ocultar la columna "IdParticipante" (Índice 0) para que no se vea
             tablaJugadores.getColumnModel().getColumn(1).setMinWidth(0);
             tablaJugadores.getColumnModel().getColumn(1).setMaxWidth(0);
             tablaJugadores.getColumnModel().getColumn(1).setWidth(0);
-            
+
             tablaJugadores.getTableHeader().setReorderingAllowed(false);
         } catch (Exception ex) {
             ManejadorErroresBD.mostrarErrorAmigable(ex);
@@ -78,7 +83,7 @@ public class VistaJugador extends javax.swing.JInternalFrame {
         cbTipoSangre.setSelectedIndex(0);
         spinNumero.setValue(0);
         idJugadorSeleccionado = -1;
-        
+
         if (idParticipanteHeredado == -1) {
             txtParticipante.setText("");
         }
@@ -270,9 +275,9 @@ public class VistaJugador extends javax.swing.JInternalFrame {
             JOptionPane.showMessageDialog(this, "Para agregar, debes abrir esta ventana desde Participante.");
             return;
         }
-        if (numero <=0 || numero > 100){
-             JOptionPane.showMessageDialog(this, "Ingresa un numero de dorsal válido (mayor a 0 y <= 100");
-             return;
+        if (numero <= 0 || numero > 100) {
+            JOptionPane.showMessageDialog(this, "Ingresa un numero de dorsal válido (mayor a 0 y <= 100");
+            return;
         }
 
         Jugador j = new Jugador();
@@ -285,11 +290,11 @@ public class VistaJugador extends javax.swing.JInternalFrame {
             JugadorDAO dao = new JugadorDAO();
             dao.insertarJugador(j);
             //JOptionPane.showMessageDialog(this, "Jugador agregado exitosamente.");
-            
+
             // Reseteamos la variable para que no agregue doble por accidente
             idParticipanteHeredado = -1;
             //btnAgregar.setEnabled(false); 
-            
+
             cargarTabla();
             limpiarCampos();
         } catch (Exception ex) {
@@ -307,11 +312,11 @@ public class VistaJugador extends javax.swing.JInternalFrame {
         String tipoSangre = cbTipoSangre.getSelectedItem().toString();
         int numero = (int) spinNumero.getValue();
 
-        if (numero <=0 || numero > 100){
-             JOptionPane.showMessageDialog(this, "Ingresa un numero de dorsal válido (mayor a 0 y <= 100");
-             return;
+        if (numero <= 0 || numero > 100) {
+            JOptionPane.showMessageDialog(this, "Ingresa un numero de dorsal válido (mayor a 0 y <= 100");
+            return;
         }
-        
+
         Jugador j = new Jugador();
         j.setIdJugador(idJugadorSeleccionado);
         j.setPosicion(posicion);
@@ -337,15 +342,15 @@ public class VistaJugador extends javax.swing.JInternalFrame {
 
         //int respuesta = JOptionPane.showConfirmDialog(this, "¿Estás seguro de que quieres eliminar a este jugador?", "Confirmar", JOptionPane.YES_NO_OPTION);
         //if (respuesta == JOptionPane.YES_OPTION) {
-            try {
-                JugadorDAO dao = new JugadorDAO();
-                dao.eliminarJugador(idJugadorSeleccionado);
-                //JOptionPane.showMessageDialog(this, "Jugador eliminado exitosamente.");
-                cargarTabla();
-                limpiarCampos();
-            } catch (Exception ex) {
-                ManejadorErroresBD.mostrarErrorAmigable(ex);
-            }
+        try {
+            JugadorDAO dao = new JugadorDAO();
+            dao.eliminarJugador(idJugadorSeleccionado);
+            //JOptionPane.showMessageDialog(this, "Jugador eliminado exitosamente.");
+            cargarTabla();
+            limpiarCampos();
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
         //}
     }//GEN-LAST:event_btnEliminarActionPerformed
 
@@ -355,14 +360,14 @@ public class VistaJugador extends javax.swing.JInternalFrame {
             try {
                 // Columna 0 es IdParticipante (Oculta), Columna 1 es IdJugador
                 idJugadorSeleccionado = Long.parseLong(tablaJugadores.getValueAt(fila, 0).toString());
-                
+
                 long idParticipanteDeTabla = Long.parseLong(tablaJugadores.getValueAt(fila, 1).toString());
                 cargarNombreForaneo(idParticipanteDeTabla);
-                
+
                 cbPosicion.setSelectedItem(tablaJugadores.getValueAt(fila, 3).toString());
                 spinNumero.setValue(Integer.parseInt(tablaJugadores.getValueAt(fila, 4).toString()));
                 cbTipoSangre.setSelectedItem(tablaJugadores.getValueAt(fila, 5).toString());
-                
+
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Error al cargar los datos de la tabla: " + ex.getMessage());
             }

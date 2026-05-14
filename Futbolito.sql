@@ -534,7 +534,7 @@ Juego.DetalleTorneo, Evento.Partido TO arbitro_user;
 GRANT USAGE ON SCHEMA Persona, Juego, Club TO capturista_user;
 
 -- Permisos completos (CRUD) para Participante, Jugador, DetalleTorneo y DetalleEquipo
-GRANT ALL PRIVILEGES ON Persona.Participante, Persona.Jugador, Juego.DetalleTorneo, Club.DetalleEquipo TO capturista_user;
+GRANT ALL PRIVILEGES ON Juego.DetalleTorneo, Club.DetalleEquipo TO capturista_user;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA Persona TO capturista_user;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA Juego TO capturista_user;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA Club TO capturista_user;
@@ -542,3 +542,12 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA Club TO capturista_user;
 -- Permisos de SOLO LECTURA (SELECT)
 GRANT SELECT ON Persona.Participante, Persona.Jugador, Juego.Torneo, 
 Juego.Jornada, Club.Equipo TO capturista_user;
+
+-- Hacemos que los triggers se ejecuten con permisos de administrador
+ALTER FUNCTION Persona.fn_tr_participante_calcular_edad() SECURITY DEFINER;
+ALTER FUNCTION Juego.fn_tr_actualizar_torneo() SECURITY DEFINER;
+ALTER FUNCTION Club.fn_tr_detalleequipo_cantidad() SECURITY DEFINER;
+ALTER FUNCTION Evento.fn_tr_resultado_actualizar_estados() SECURITY DEFINER;
+ALTER FUNCTION Evento.fn_tr_prevenir_borrar_resultado() SECURITY DEFINER;
+ALTER FUNCTION Evento.fn_tr_gol_actualizar_marcador() SECURITY DEFINER;
+ALTER FUNCTION Evento.fn_tr_tarjeta_estado_jugador() SECURITY DEFINER;

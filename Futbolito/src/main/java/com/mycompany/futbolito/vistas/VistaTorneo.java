@@ -7,6 +7,7 @@ package com.mycompany.futbolito.vistas;
 import com.mycompany.futbolito.dao.TorneoDAO;
 import com.mycompany.futbolito.modelos.Torneo;
 import com.mycompany.futbolito.utilidades.ManejadorErroresBD;
+import com.mycompany.futbolito.utilidades.SesionGlobal;
 import javax.swing.JOptionPane;
 import java.util.Date;
 
@@ -17,27 +18,33 @@ import java.util.Date;
 public class VistaTorneo extends javax.swing.JInternalFrame {
 
     private long idTorneoSeleccionado = -1;
+
     /**
      * Creates new form VistaDetalleTorneo
      */
     public VistaTorneo() {
         initComponents();
-        
+
         // Ajustamos la altura de las filas
         tablaTorneos.setRowHeight(30);
         cargarTabla();
         limpiarCampos();
+        if (SesionGlobal.rol.equals("Capturista")) {
+            btnAgregar.setVisible(false);
+            btnModificar.setVisible(false);
+            btnEliminar.setVisible(false);
+        }
     }
 
     private void cargarTabla() {
         try {
             TorneoDAO dao = new TorneoDAO();
             tablaTorneos.setModel(dao.obtenerModeloTorneos());
-            
+
             // Auto-ajustamos las columnas usando tu clase de utilidades
             com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaTorneos);
             tablaTorneos.getTableHeader().setReorderingAllowed(false);
-            
+
         } catch (Exception ex) {
             ManejadorErroresBD.mostrarErrorAmigable(ex);
         }
@@ -52,7 +59,7 @@ public class VistaTorneo extends javax.swing.JInternalFrame {
         fechaFin.setDate(new Date());
         idTorneoSeleccionado = -1;
     }
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -256,7 +263,7 @@ public class VistaTorneo extends javax.swing.JInternalFrame {
         int edadMin = (int) spinnerEdadMin.getValue();
         int edadMax = (int) spinnerEdadMax.getValue();
         String genero = cbGenero.getSelectedItem().toString();
-        
+
         // Convertimos a java.sql.Date directo para limpiar las horas y minutos (igual que .Date de C#)
         java.sql.Date fIni = new java.sql.Date(fechaIni.getDate().getTime());
         java.sql.Date fFin = new java.sql.Date(fechaFin.getDate().getTime());
@@ -271,13 +278,13 @@ public class VistaTorneo extends javax.swing.JInternalFrame {
             JOptionPane.showMessageDialog(this, "La edad mínima no puede ser mayor que la edad máxima", "Atención", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
+
         // fIni.compareTo(fFin) > 0 significa que Inicio es DESPUÉS de Fin
         if (fIni.compareTo(fFin) > 0) {
             JOptionPane.showMessageDialog(this, "La fecha de inicio no puede ser posterior a la fecha de fin", "Atención", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
+
         // Usamos toString para comparar que no sean exactamente el mismo día
         if (fIni.toString().equals(fFin.toString())) {
             JOptionPane.showMessageDialog(this, "La fecha de inicio no puede ser igual a la fecha de fin", "Atención", JOptionPane.WARNING_MESSAGE);
@@ -313,7 +320,7 @@ public class VistaTorneo extends javax.swing.JInternalFrame {
         int edadMin = (int) spinnerEdadMin.getValue();
         int edadMax = (int) spinnerEdadMax.getValue();
         String genero = cbGenero.getSelectedItem().toString();
-        
+
         java.sql.Date fIni = new java.sql.Date(fechaIni.getDate().getTime());
         java.sql.Date fFin = new java.sql.Date(fechaFin.getDate().getTime());
 
@@ -382,25 +389,26 @@ public class VistaTorneo extends javax.swing.JInternalFrame {
                 spinnerEdadMin.setValue(Integer.parseInt(tablaTorneos.getValueAt(fila, 2).toString()));
                 spinnerEdadMax.setValue(Integer.parseInt(tablaTorneos.getValueAt(fila, 3).toString()));
                 cbGenero.setSelectedItem(tablaTorneos.getValueAt(fila, 4).toString());
-                
+
                 // Conversión de las fechas de la tabla al JCalendar
                 java.sql.Date fechaIniSQL = (java.sql.Date) tablaTorneos.getValueAt(fila, 5);
                 java.sql.Date fechaFinSQL = (java.sql.Date) tablaTorneos.getValueAt(fila, 6);
-                
+
                 fechaIni.setDate(new java.util.Date(fechaIniSQL.getTime()));
                 fechaFin.setDate(new java.util.Date(fechaFinSQL.getTime()));
-                
+
             } catch (Exception ex) {
                 // En C# tenías un "Error al seleccionar el torneo", aquí aplicamos el limpiaElementos() como tenías
-            JOptionPane.showMessageDialog(this, "Error al cargar los torneos", "Atención", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Error al cargar los torneos", "Atención", JOptionPane.WARNING_MESSAGE);
             }
         }
     }//GEN-LAST:event_tablaTorneosMouseClicked
 
     private void txtNombreTorneoKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtNombreTorneoKeyTyped
-    if (txtNombreTorneo.getText().length() >= 50)
+        if (txtNombreTorneo.getText().length() >= 50) {
             evt.consume();
-        
+        }
+
     }//GEN-LAST:event_txtNombreTorneoKeyTyped
 
 

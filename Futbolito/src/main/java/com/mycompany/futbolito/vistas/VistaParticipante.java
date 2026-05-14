@@ -3,6 +3,7 @@ package com.mycompany.futbolito.vistas;
 import com.mycompany.futbolito.dao.ParticipanteDAO;
 import com.mycompany.futbolito.modelos.Participante;
 import com.mycompany.futbolito.utilidades.ManejadorErroresBD;
+import com.mycompany.futbolito.utilidades.SesionGlobal;
 import javax.swing.JOptionPane;
 import java.util.Date;
 
@@ -19,6 +20,11 @@ public class VistaParticipante extends javax.swing.JInternalFrame {
         // Cargamos los datos iniciales
         cargarTabla();
         limpiarCampos();
+        if (SesionGlobal.rol.equals("Capturista")) {
+            btnAgregar.setVisible(false);
+            btnModificar.setVisible(false);
+            btnEliminar.setVisible(false);
+        }
     }
     
     private void cargarTabla() {

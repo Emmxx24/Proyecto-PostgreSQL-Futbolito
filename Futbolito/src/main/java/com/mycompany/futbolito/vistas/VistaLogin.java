@@ -41,6 +41,7 @@ public class VistaLogin extends javax.swing.JFrame {
         btnLogin = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Login Futbolito");
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 48)); // NOI18N
         jLabel1.setText("Futbolito");
@@ -104,6 +105,7 @@ public class VistaLogin extends javax.swing.JFrame {
     private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed
         String user = txtUsuario.getText();
         String pass = txtPassword.getText();
+        String tittle;
 
 // Guardamos temporalmente para intentar conectar
         SesionGlobal.usuarioDB = user;
@@ -117,15 +119,19 @@ public class VistaLogin extends javax.swing.JFrame {
                 // Definimos el rol para ocultar botones en las ventanas
                 if (user.equals("arbitro_user")) {
                     SesionGlobal.rol = "Arbitro";
+                    tittle = "Arbitro";
                 } else if (user.equals("capturista_user")) {
                     SesionGlobal.rol = "Capturista";
+                    tittle = "Capturista";
                 } else {
                     SesionGlobal.rol = "Admin";
+                    tittle = "Admin";
                 }
 
                 // Abrimos el menú principal y cerramos el login
                 Menu menu = new Menu();
                 menu.setVisible(true);
+                menu.setTitle(tittle);
                 this.dispose();
             }
         } catch (Exception ex) {

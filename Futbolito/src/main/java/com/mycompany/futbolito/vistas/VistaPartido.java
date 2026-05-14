@@ -7,6 +7,7 @@ package com.mycompany.futbolito.vistas;
 import com.mycompany.futbolito.dao.PartidoDAO;
 import com.mycompany.futbolito.modelos.Partido;
 import com.mycompany.futbolito.utilidades.ManejadorErroresBD;
+import com.mycompany.futbolito.utilidades.SesionGlobal;
 import javax.swing.JOptionPane;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,46 +27,59 @@ public class VistaPartido extends javax.swing.JInternalFrame {
     private List<PartidoDAO.ItemCombo> listaLugares = new ArrayList<>();
     private List<PartidoDAO.ItemCombo> listaArbitros = new ArrayList<>();
     private List<PartidoDAO.ItemCombo> listaEquipos = new ArrayList<>();
+
     /**
      * Creates new form VistaPartidos
      */
     public VistaPartido() {
         initComponents();
-        
+
         spinnerHora.setModel(new SpinnerDateModel());
         JSpinner.DateEditor timeEditor = new JSpinner.DateEditor(spinnerHora, "HH:mm");
         spinnerHora.setEditor(timeEditor);
 
-        tablaPartidos.setRowHeight(30); 
-        
+        tablaPartidos.setRowHeight(30);
+
         cbJornada.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 actualizarEquiposPorJornada();
             }
         });
-        
+
+        if (SesionGlobal.rol.equals("Arbitro")) {
+            btnAgregar.setVisible(false);
+            btnModificar.setVisible(false);
+            btnEliminar.setVisible(false);
+        }
+
         cargarCombos();
         cargarTabla();
         limpiarCampos();
     }
-    
+
     private void cargarCombos() {
         try {
             PartidoDAO dao = new PartidoDAO();
-            
+
             cbJornada.removeAllItems();
             listaJornadas = dao.obtenerJornadasCombo();
-            for (PartidoDAO.ItemCombo i : listaJornadas) cbJornada.addItem(i.texto);
-            
+            for (PartidoDAO.ItemCombo i : listaJornadas) {
+                cbJornada.addItem(i.texto);
+            }
+
             cbLugar.removeAllItems();
             listaLugares = dao.obtenerLugaresCombo();
-            for (PartidoDAO.ItemCombo i : listaLugares) cbLugar.addItem(i.texto);
-            
+            for (PartidoDAO.ItemCombo i : listaLugares) {
+                cbLugar.addItem(i.texto);
+            }
+
             cbArbitro.removeAllItems();
             listaArbitros = dao.obtenerArbitrosCombo();
-            for (PartidoDAO.ItemCombo i : listaArbitros) cbArbitro.addItem(i.texto);
-            
+            for (PartidoDAO.ItemCombo i : listaArbitros) {
+                cbArbitro.addItem(i.texto);
+            }
+
         } catch (Exception ex) {
             ManejadorErroresBD.mostrarErrorAmigable(ex);
         }
@@ -75,7 +89,7 @@ public class VistaPartido extends javax.swing.JInternalFrame {
         try {
             PartidoDAO dao = new PartidoDAO();
             tablaPartidos.setModel(dao.obtenerModeloPartidos());
-            
+
             for (int i = 1; i <= 5; i++) {
                 tablaPartidos.getColumnModel().getColumn(i).setMinWidth(0);
                 tablaPartidos.getColumnModel().getColumn(i).setMaxWidth(0);
@@ -96,24 +110,24 @@ public class VistaPartido extends javax.swing.JInternalFrame {
         cbEquiLoc.setSelectedIndex(-1);
         cbEquiVisi.setSelectedIndex(-1);
         fecha.setDate(new Date());
-        
+
         // ¡LA MAGIA DE LA HORA! Borramos segundos y milisegundos al inicializar
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.HOUR_OF_DAY, 12);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0); 
+        cal.set(Calendar.MILLISECOND, 0);
         spinnerHora.setValue(cal.getTime());
-        
+
         idPartidoSeleccionado = -1;
         actualizarBotones(false);
     }
-    
+
     private void actualizarBotones(boolean mostrar) {
         btnRegResultado.setEnabled(mostrar);
         btnRegResultado.setVisible(mostrar);
     }
-    
+
     private void actualizarEquiposPorJornada() {
         if (cbJornada.getSelectedIndex() == -1) {
             cbEquiLoc.removeAllItems();
@@ -151,7 +165,7 @@ public class VistaPartido extends javax.swing.JInternalFrame {
         cal.set(Calendar.MILLISECOND, 0);
         return new java.sql.Time(cal.getTimeInMillis());
     }
-    
+
     // ==========================================
     // LÓGICA DE VALIDACIÓN 
     // ==========================================
@@ -190,8 +204,8 @@ public class VistaPartido extends javax.swing.JInternalFrame {
                 return false;
             }
 
-            return true; 
-            
+            return true;
+
         } catch (Exception ex) {
             ManejadorErroresBD.mostrarErrorAmigable(ex);
             return false;
@@ -444,12 +458,14 @@ public class VistaPartido extends javax.swing.JInternalFrame {
         long idArbitro = listaArbitros.get(cbArbitro.getSelectedIndex()).id;
         long idLocal = listaEquipos.get(cbEquiLoc.getSelectedIndex()).id;
         long idVisitante = listaEquipos.get(cbEquiVisi.getSelectedIndex()).id;
-        
+
         java.sql.Date sqlFecha = new java.sql.Date(fecha.getDate().getTime());
         java.sql.Time sqlHora = extraerHoraLimpia(); // Usamos nuestra función limpia
 
-        if (!esValidoParaGuardar(idLocal, idVisitante, idJornada, idLugar, idArbitro, sqlFecha, sqlHora, 0)) return;
-        
+        if (!esValidoParaGuardar(idLocal, idVisitante, idJornada, idLugar, idArbitro, sqlFecha, sqlHora, 0)) {
+            return;
+        }
+
         Partido p = new Partido();
         p.setIdJornada(idJornada);
         p.setIdLugar(idLugar);
@@ -484,12 +500,14 @@ public class VistaPartido extends javax.swing.JInternalFrame {
         long idArbitro = listaArbitros.get(cbArbitro.getSelectedIndex()).id;
         long idLocal = listaEquipos.get(cbEquiLoc.getSelectedIndex()).id;
         long idVisitante = listaEquipos.get(cbEquiVisi.getSelectedIndex()).id;
-        
+
         java.sql.Date sqlFecha = new java.sql.Date(fecha.getDate().getTime());
         java.sql.Time sqlHora = extraerHoraLimpia();
 
-        if (!esValidoParaGuardar(idLocal, idVisitante, idJornada, idLugar, idArbitro, sqlFecha, sqlHora, 1)) return;
-        
+        if (!esValidoParaGuardar(idLocal, idVisitante, idJornada, idLugar, idArbitro, sqlFecha, sqlHora, 1)) {
+            return;
+        }
+
         Partido p = new Partido();
         p.setIdPartido(idPartidoSeleccionado);
         p.setIdJornada(idJornada);
@@ -535,20 +553,45 @@ public class VistaPartido extends javax.swing.JInternalFrame {
                 long idArbitro = Long.parseLong(tablaPartidos.getValueAt(fila, 3).toString());
                 long idLocal = Long.parseLong(tablaPartidos.getValueAt(fila, 4).toString());
                 long idVisitante = Long.parseLong(tablaPartidos.getValueAt(fila, 5).toString());
-                
-                for (int i = 0; i < listaJornadas.size(); i++) if (listaJornadas.get(i).id == idJornada) { cbJornada.setSelectedIndex(i); break; }
-                for (int i = 0; i < listaLugares.size(); i++) if (listaLugares.get(i).id == idLugar) { cbLugar.setSelectedIndex(i); break; }
-                for (int i = 0; i < listaArbitros.size(); i++) if (listaArbitros.get(i).id == idArbitro) { cbArbitro.setSelectedIndex(i); break; }
-                
+
+                for (int i = 0; i < listaJornadas.size(); i++) {
+                    if (listaJornadas.get(i).id == idJornada) {
+                        cbJornada.setSelectedIndex(i);
+                        break;
+                    }
+                }
+                for (int i = 0; i < listaLugares.size(); i++) {
+                    if (listaLugares.get(i).id == idLugar) {
+                        cbLugar.setSelectedIndex(i);
+                        break;
+                    }
+                }
+                for (int i = 0; i < listaArbitros.size(); i++) {
+                    if (listaArbitros.get(i).id == idArbitro) {
+                        cbArbitro.setSelectedIndex(i);
+                        break;
+                    }
+                }
+
                 // Los equipos dependen de la jornada seleccionada, por lo que el ActionListener los rellenó, ahora los seleccionamos
-                for (int i = 0; i < listaEquipos.size(); i++) if (listaEquipos.get(i).id == idLocal) { cbEquiLoc.setSelectedIndex(i); break; }
-                for (int i = 0; i < listaEquipos.size(); i++) if (listaEquipos.get(i).id == idVisitante) { cbEquiVisi.setSelectedIndex(i); break; }
-                
+                for (int i = 0; i < listaEquipos.size(); i++) {
+                    if (listaEquipos.get(i).id == idLocal) {
+                        cbEquiLoc.setSelectedIndex(i);
+                        break;
+                    }
+                }
+                for (int i = 0; i < listaEquipos.size(); i++) {
+                    if (listaEquipos.get(i).id == idVisitante) {
+                        cbEquiVisi.setSelectedIndex(i);
+                        break;
+                    }
+                }
+
                 java.sql.Date fechaSQL = (java.sql.Date) tablaPartidos.getValueAt(fila, 11);
                 java.sql.Time horaSQL = (java.sql.Time) tablaPartidos.getValueAt(fila, 12);
-                
+
                 fecha.setDate(new java.util.Date(fechaSQL.getTime()));
-                spinnerHora.setValue(new java.util.Date(horaSQL.getTime())); 
+                spinnerHora.setValue(new java.util.Date(horaSQL.getTime()));
                 actualizarBotones(true);
             } catch (Exception ex) {
                 limpiarCampos();
@@ -558,35 +601,35 @@ public class VistaPartido extends javax.swing.JInternalFrame {
 
     private void btnRegResultadoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegResultadoActionPerformed
         if (idPartidoSeleccionado != -1) {
-                try {
-                    // 1. Instanciamos la vista de Resultado con el ID del partido seleccionado
-                    VistaResultadoPartido ventanaResultado = new VistaResultadoPartido(idPartidoSeleccionado);
+            try {
+                // 1. Instanciamos la vista de Resultado con el ID del partido seleccionado
+                VistaResultadoPartido ventanaResultado = new VistaResultadoPartido(idPartidoSeleccionado);
 
-                    // 2. Extraemos el escritorio padre (JDesktopPane)
-                    javax.swing.JDesktopPane escritorio = this.getDesktopPane();
+                // 2. Extraemos el escritorio padre (JDesktopPane)
+                javax.swing.JDesktopPane escritorio = this.getDesktopPane();
 
-                    if (escritorio != null) {
-                        // 3. Limpiamos el escritorio (esto elimina VistaPartido y cualquier otra ventana abierta)
-                        escritorio.removeAll();
-                        escritorio.repaint();
+                if (escritorio != null) {
+                    // 3. Limpiamos el escritorio (esto elimina VistaPartido y cualquier otra ventana abierta)
+                    escritorio.removeAll();
+                    escritorio.repaint();
 
-                        // 4. Agregamos la de Resultado y la mostramos
-                        escritorio.add(ventanaResultado);
-                        ventanaResultado.setVisible(true);
+                    // 4. Agregamos la de Resultado y la mostramos
+                    escritorio.add(ventanaResultado);
+                    ventanaResultado.setVisible(true);
 
-                        // 5. Intentamos maximizarla para que ocupe todo el espacio disponible
-                        try {
-                            ventanaResultado.setMaximum(true);
-                        } catch (java.beans.PropertyVetoException e) {
-                            // Si el sistema no permite maximizar, simplemente se queda con su tamaño por defecto
-                        }
+                    // 5. Intentamos maximizarla para que ocupe todo el espacio disponible
+                    try {
+                        ventanaResultado.setMaximum(true);
+                    } catch (java.beans.PropertyVetoException e) {
+                        // Si el sistema no permite maximizar, simplemente se queda con su tamaño por defecto
                     }
-                } catch (Exception ex) {
-                    ManejadorErroresBD.mostrarErrorAmigable(ex);
                 }
-            } else {
-                JOptionPane.showMessageDialog(this, "Selecciona un partido de la tabla primero.", "Atención", JOptionPane.WARNING_MESSAGE);
+            } catch (Exception ex) {
+                ManejadorErroresBD.mostrarErrorAmigable(ex);
             }
+        } else {
+            JOptionPane.showMessageDialog(this, "Selecciona un partido de la tabla primero.", "Atención", JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_btnRegResultadoActionPerformed
 
 

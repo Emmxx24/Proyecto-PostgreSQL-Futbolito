@@ -4,6 +4,8 @@
  */
 package com.mycompany.futbolito.vistas;
 
+import com.mycompany.futbolito.utilidades.SesionGlobal;
+
 /**
  *
  * @author Usuario
@@ -17,7 +19,24 @@ public class Menu extends javax.swing.JFrame {
      */
     public Menu() {
         initComponents();
-        abrirFormularioHijo(new VistaParticipante());
+        if (SesionGlobal.rol.equals("Arbitro")) {
+            menuJuego.setVisible(false);
+            menuClub.setVisible(false);
+            menuParticipante.setVisible(false);
+            menuArbitro.setVisible(false);
+            abrirFormularioHijo(new VistaPartido());
+        } else if (SesionGlobal.rol.equals("Capturista")) {
+            /*menuArbitro.setVisible(false);
+            menuLugar.setVisible(false);
+            menuPartido.setVisible(false);
+            menuResultadoPartido.setVisible(false);
+            menuTarjeta.setVisible(false);
+            menuGol.setVisible(false);*/
+            menuEvento.setVisible(false);
+            menuArbitro.setVisible(false);
+            menuLugar.setVisible(false);
+            abrirFormularioHijo(new VistaParticipante());
+        } else abrirFormularioHijo(new VistaParticipante());
     }
 
     /**

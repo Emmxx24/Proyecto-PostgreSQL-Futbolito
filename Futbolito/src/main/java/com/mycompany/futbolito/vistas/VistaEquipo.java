@@ -7,6 +7,7 @@ package com.mycompany.futbolito.vistas;
 import com.mycompany.futbolito.dao.EquipoDAO;
 import com.mycompany.futbolito.modelos.Equipo;
 import com.mycompany.futbolito.utilidades.ManejadorErroresBD;
+import com.mycompany.futbolito.utilidades.SesionGlobal;
 import javax.swing.JOptionPane;
 import javax.swing.ImageIcon;
 import java.awt.Image;
@@ -18,40 +19,47 @@ import javax.imageio.ImageIO;
  * @author Usuario
  */
 public class VistaEquipo extends javax.swing.JInternalFrame {
+
     private long idEquipoSeleccionado = -1;
+
     /**
      * Creates new form VistaEquipo
      */
     public VistaEquipo() {
         initComponents();
-        
+
         // El mismo alto de fila que tenías en C# (60) para que quepa la imagen bien
         tablaEquipos.setRowHeight(60);
-        
+
         cargarTabla();
         limpiarCampos();
+        if (SesionGlobal.rol.equals("Capturista")) {
+            btnAgregar.setVisible(false);
+            btnModificar.setVisible(false);
+            btnEliminar.setVisible(false);
+        }
     }
-    
+
     private void cargarTabla() {
         try {
             EquipoDAO dao = new EquipoDAO();
             tablaEquipos.setModel(dao.obtenerModeloEquipos());
-            
+
             com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaEquipos);
-            
+
             // Configuramos la columna de la Imagen para que tenga un ancho de 80
             tablaEquipos.getColumnModel().getColumn(2).setPreferredWidth(80);
-            
+
             // Ocultamos la columna 4 (que trae el texto de la URL)
             tablaEquipos.getColumnModel().getColumn(4).setMinWidth(0);
             tablaEquipos.getColumnModel().getColumn(4).setMaxWidth(0);
             tablaEquipos.getColumnModel().getColumn(4).setWidth(0);
-            
+
             tablaEquipos.getTableHeader().setReorderingAllowed(false);
-            
+
             // LA MAGIA DE JAVA: Llamamos a la descarga de imágenes en el fondo
             cargarImagenesAsincrono();
-            
+
         } catch (Exception ex) {
             ManejadorErroresBD.mostrarErrorAmigable(ex);
         }
@@ -63,24 +71,24 @@ public class VistaEquipo extends javax.swing.JInternalFrame {
             for (int i = 0; i < tablaEquipos.getRowCount(); i++) {
                 // Sacamos la URL de la columna 4 (la oculta)
                 String urlTexto = (String) tablaEquipos.getModel().getValueAt(i, 4);
-                
+
                 if (urlTexto != null && !urlTexto.isEmpty()) {
                     try {
                         URL url = new URL(urlTexto);
-                        
+
                         // --- EL TRUCO DEL USER-AGENT ---
                         java.net.HttpURLConnection conexionHttp = (java.net.HttpURLConnection) url.openConnection();
                         // Nos disfrazamos de navegador de Windows para que Wikipedia no nos bloquee
                         conexionHttp.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
-                        
+
                         // Leemos la imagen pero desde nuestra conexión disfrazada
                         Image img = ImageIO.read(conexionHttp.getInputStream());
                         // -------------------------------
-                        
+
                         if (img != null) {
                             Image imgEscalada = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
                             ImageIcon icono = new ImageIcon(imgEscalada);
-                            
+
                             final int filaActual = i;
                             javax.swing.SwingUtilities.invokeLater(() -> {
                                 tablaEquipos.getModel().setValueAt(icono, filaActual, 2);
@@ -92,7 +100,7 @@ public class VistaEquipo extends javax.swing.JInternalFrame {
                 }
             }
         });
-        
+
         // Arrancamos el hilo secundario
         hiloDescarga.start();
     }
@@ -269,7 +277,7 @@ public class VistaEquipo extends javax.swing.JInternalFrame {
 
         try {
             EquipoDAO dao = new EquipoDAO();
-            
+
             if (dao.existeNombreEquipo(nombre, -1)) {
                 JOptionPane.showMessageDialog(this, "Ya existe un equipo con ese nombre.", "Atención", JOptionPane.WARNING_MESSAGE);
                 return;
@@ -304,7 +312,7 @@ public class VistaEquipo extends javax.swing.JInternalFrame {
 
         try {
             EquipoDAO dao = new EquipoDAO();
-            
+
             if (dao.existeNombreEquipo(nombre, idEquipoSeleccionado)) {
                 JOptionPane.showMessageDialog(this, "Ya existe un equipo con ese nombre.", "Atención", JOptionPane.WARNING_MESSAGE);
                 return;
@@ -346,10 +354,10 @@ public class VistaEquipo extends javax.swing.JInternalFrame {
             try {
                 idEquipoSeleccionado = Long.parseLong(tablaEquipos.getValueAt(fila, 0).toString());
                 txtNombre.setText(tablaEquipos.getValueAt(fila, 1).toString());
-                
+
                 // La columna 2 es la imagen, la 3 son los jugadores, la 4 es el texto de la URL
                 txtUrl.setText(tablaEquipos.getValueAt(fila, 4).toString());
-                
+
             } catch (Exception ex) {
                 // Si hay error, simplemente limpiamos como tenías en C#
                 limpiarCampos();
