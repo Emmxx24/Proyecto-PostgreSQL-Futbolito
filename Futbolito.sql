@@ -413,3 +413,95 @@ DROP TRIGGER IF EXISTS TR_GOL_ACTUALIZAR_MARCADOR ON Evento.Gol;
 CREATE TRIGGER TR_GOL_ACTUALIZAR_MARCADOR
 AFTER INSERT OR UPDATE OR DELETE ON Evento.Gol
 FOR EACH ROW EXECUTE FUNCTION Evento.fn_tr_gol_actualizar_marcador();
+
+-- 7. Disparador para actualizar el estado de los jugadores 
+-- despues de las inserciones de tarjetas, asi como para reiniciar 
+-- su acumulador de tarjetas amarillas
+CREATE OR REPLACE FUNCTION Evento.fn_tr_tarjeta_estado_jugador()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- 1. CASO INSERT
+    IF (TG_OP = 'INSERT') THEN
+        
+        -- A) Si es amarilla, sumamos al acumulador
+        IF (NEW.TipoTarjeta = 'Amarilla') THEN
+            UPDATE Persona.Jugador 
+            SET AcumuladorAmarillas = AcumuladorAmarillas + 1 
+            WHERE IdJugador = NEW.IdJugador;
+        END IF;
+
+        -- B) Verificamos si se debe suspender (Por roja o por juntar 2 amarillas)
+        UPDATE Persona.Jugador
+        SET Estado = 'Suspendido',
+            AcumuladorAmarillas = 0 
+        WHERE IdJugador = NEW.IdJugador
+          AND (NEW.TipoTarjeta = 'Roja' OR AcumuladorAmarillas >= 2);
+
+        RETURN NEW;
+
+	-- 2. CASO DELETE
+    ELSIF (TG_OP = 'DELETE') THEN
+        -- A) Si le borramos una amarilla y estaba activo, le restamos 1 al acumulador
+        IF (OLD.TipoTarjeta = 'Amarilla') THEN
+            UPDATE Persona.Jugador 
+            SET AcumuladorAmarillas = GREATEST(AcumuladorAmarillas - 1, 0)
+            WHERE IdJugador = OLD.IdJugador AND Estado = 'Activo';
+        END IF;
+
+        -- B) Si estaba suspendido, lo regresamos a Activo (Cuidando que no tenga otra roja en ese mismo partido)
+        UPDATE Persona.Jugador j
+        SET Estado = 'Activo',
+            AcumuladorAmarillas = CASE WHEN OLD.TipoTarjeta = 'Amarilla' THEN 1 ELSE 0 END
+        WHERE j.IdJugador = OLD.IdJugador 
+          AND j.Estado = 'Suspendido'
+          AND NOT EXISTS (
+              SELECT 1 FROM Evento.Tarjeta t 
+              WHERE t.IdJugador = j.IdJugador 
+                AND t.IdPartido = OLD.IdPartido 
+                AND t.TipoTarjeta = 'Roja' 
+                AND t.IdTarjeta != OLD.IdTarjeta
+          );
+
+        RETURN OLD;
+
+    -- 3. CASO UPDATE
+    ELSIF (TG_OP = 'UPDATE') THEN
+        -- Solo ejecutamos si cambiaron el Tipo de Tarjeta o el Jugador
+        IF (OLD.TipoTarjeta IS DISTINCT FROM NEW.TipoTarjeta OR OLD.IdJugador IS DISTINCT FROM NEW.IdJugador) THEN
+            -- A) Revertimos el efecto de la tarjeta vieja (Como en el DELETE)
+            UPDATE Persona.Jugador 
+            SET Estado = 'Activo',
+                AcumuladorAmarillas = CASE 
+                    WHEN OLD.TipoTarjeta = 'Amarilla' AND Estado = 'Activo' AND AcumuladorAmarillas > 0 
+                    THEN AcumuladorAmarillas - 1 
+                    ELSE AcumuladorAmarillas 
+                END
+            WHERE IdJugador = OLD.IdJugador;
+
+            -- B) Aplicamos el efecto de la tarjeta nueva (Como en el INSERT)
+            IF (NEW.TipoTarjeta = 'Amarilla') THEN
+                UPDATE Persona.Jugador 
+                SET AcumuladorAmarillas = AcumuladorAmarillas + 1 
+                WHERE IdJugador = NEW.IdJugador;
+            END IF;
+
+            UPDATE Persona.Jugador
+            SET Estado = 'Suspendido',
+                AcumuladorAmarillas = 0
+            WHERE IdJugador = NEW.IdJugador
+              AND (NEW.TipoTarjeta = 'Roja' OR AcumuladorAmarillas >= 2);
+              
+        END IF;
+
+        RETURN NEW;
+    END IF;
+
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS TR_TARJETA_ESTADO_JUGADOR ON Evento.Tarjeta;
+CREATE TRIGGER TR_TARJETA_ESTADO_JUGADOR
+AFTER INSERT OR UPDATE OR DELETE ON Evento.Tarjeta
+FOR EACH ROW
+EXECUTE FUNCTION Evento.fn_tr_tarjeta_estado_jugador();
