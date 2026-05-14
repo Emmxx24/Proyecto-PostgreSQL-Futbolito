@@ -505,3 +505,40 @@ CREATE TRIGGER TR_TARJETA_ESTADO_JUGADOR
 AFTER INSERT OR UPDATE OR DELETE ON Evento.Tarjeta
 FOR EACH ROW
 EXECUTE FUNCTION Evento.fn_tr_tarjeta_estado_jugador();
+
+-- 1. CREAR LOS USUARIOS (Con sus contraseñas)
+CREATE USER admin_bd WITH PASSWORD 'admin123' SUPERUSER; -- El que le mueve a todo
+CREATE USER arbitro_user WITH PASSWORD 'arbitro123';
+CREATE USER capturista_user WITH PASSWORD 'capturista123';
+
+-- ==============================================================
+-- 2. PERMISOS DEL ÁRBITRO
+-- ==============================================================
+-- Dar acceso a los esquemas
+GRANT USAGE ON SCHEMA Evento, Persona, Juego, Club TO arbitro_user;
+
+-- Permisos completos (CRUD) para Resultados, Tarjetas y Goles
+GRANT ALL PRIVILEGES ON Evento.ResultadoPartido, Evento.Tarjeta, Evento.Gol TO arbitro_user;
+-- IMPORTANTE: Si usas campos SERIAL o IDENTITY, dales permiso a las secuencias
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA Evento TO arbitro_user;
+
+-- Permisos de SOLO LECTURA (SELECT)
+GRANT SELECT ON Persona.Participante, Persona.Jugador, Persona.Arbitro, Juego.Torneo, 
+Juego.Jornada, Juego.Lugar, Club.Equipo, Club.DetalleEquipo, 
+Juego.DetalleTorneo, Evento.Partido TO arbitro_user;
+
+-- ==============================================================
+-- 3. PERMISOS DEL CAPTURISTA
+-- ==============================================================
+-- Dar acceso a los esquemas
+GRANT USAGE ON SCHEMA Persona, Juego, Club TO capturista_user;
+
+-- Permisos completos (CRUD) para Participante, Jugador, DetalleTorneo y DetalleEquipo
+GRANT ALL PRIVILEGES ON Persona.Participante, Persona.Jugador, Juego.DetalleTorneo, Club.DetalleEquipo TO capturista_user;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA Persona TO capturista_user;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA Juego TO capturista_user;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA Club TO capturista_user;
+
+-- Permisos de SOLO LECTURA (SELECT)
+GRANT SELECT ON Persona.Participante, Persona.Jugador, Juego.Torneo, 
+Juego.Jornada, Club.Equipo TO capturista_user;
