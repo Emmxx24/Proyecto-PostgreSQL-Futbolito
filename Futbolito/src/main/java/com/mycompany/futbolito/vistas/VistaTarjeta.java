@@ -4,6 +4,12 @@
  */
 package com.mycompany.futbolito.vistas;
 
+import com.mycompany.futbolito.dao.TarjetaDAO;
+import com.mycompany.futbolito.utilidades.ManejadorErroresBD;
+import javax.swing.JOptionPane;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author Usuario
@@ -13,8 +19,81 @@ public class VistaTarjeta extends javax.swing.JInternalFrame {
     /**
      * Creates new form VistaTarjeta
      */
+    private long idTarjetaSeleccionada = -1;
+    private long idPartidoFK = -1;
+    private long idPartidoSeleccionado = -1;
+    private List<TarjetaDAO.ItemCombo> listaJugadores = new ArrayList<>();
+
     public VistaTarjeta() {
+        this(-1);
+    }
+
+    public VistaTarjeta(long idPartido) {
         initComponents();
+        tablaTarjetas.setRowHeight(30);
+        tablaTarjetas.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tablaTarjetasMouseClicked(evt);
+            }
+        });
+
+        cargarTarjetas();
+        limpiarElementos();
+
+        if (idPartido != -1) {
+            this.idPartidoFK = idPartido;
+            cargaJugadores(idPartidoFK);
+            try {
+                TarjetaDAO dao = new TarjetaDAO();
+                jTextField1.setText(dao.obtenerDatosPartidoForaneo(idPartidoFK));
+            } catch (Exception ex) {
+                ManejadorErroresBD.mostrarErrorAmigable(ex);
+            }
+        }
+    }
+
+    private void cargarTarjetas() {
+        try {
+            TarjetaDAO dao = new TarjetaDAO();
+            tablaTarjetas.setModel(dao.obtenerModeloTarjetas());
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaTarjetas);
+
+            // Ocultar IDs (0, 2, 3, 7, 8)
+            int[] ocultas = {0, 2, 3, 7, 8};
+            for (int i : ocultas) {
+                tablaTarjetas.getColumnModel().getColumn(i).setMinWidth(0);
+                tablaTarjetas.getColumnModel().getColumn(i).setMaxWidth(0);
+                tablaTarjetas.getColumnModel().getColumn(i).setWidth(0);
+            }
+            tablaTarjetas.getTableHeader().setReorderingAllowed(false);
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }
+
+    private void cargaJugadores(long idPartido) {
+        try {
+            TarjetaDAO dao = new TarjetaDAO();
+            cbJugador.removeAllItems();
+            listaJugadores = dao.obtenerJugadoresCombo(idPartido);
+            for (TarjetaDAO.ItemCombo i : listaJugadores) {
+                cbJugador.addItem(i.texto);
+            }
+            cbJugador.setSelectedIndex(-1);
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }
+
+    private void limpiarElementos() {
+        idTarjetaSeleccionada = -1;
+        idPartidoSeleccionado = -1;
+        if (idPartidoFK == -1) {
+            jTextField1.setText("");
+        }
+        cbJugador.setSelectedIndex(-1);
+        cbTarjeta.setSelectedIndex(-1);
+        minuto.setValue(0);
     }
 
     /**
@@ -36,11 +115,13 @@ public class VistaTarjeta extends javax.swing.JInternalFrame {
         cbJugador = new javax.swing.JComboBox<>();
         minuto = new javax.swing.JSpinner();
         cbTarjeta = new javax.swing.JComboBox<>();
+        jLabel4 = new javax.swing.JLabel();
+        jTextField1 = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tablaTarjetas = new javax.swing.JTable();
 
-        jPanel1.setBackground(new java.awt.Color(255, 102, 102));
+        setTitle("Tarjeta");
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel1.setText("Jugador:");
@@ -53,12 +134,15 @@ public class VistaTarjeta extends javax.swing.JInternalFrame {
 
         btnAgregar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnAgregar.setText("Agregar");
+        btnAgregar.addActionListener(this::btnAgregarActionPerformed);
 
         btnModificar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnModificar.setText("Modificar");
+        btnModificar.addActionListener(this::btnModificarActionPerformed);
 
         btnEliminar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnEliminar.setText("Eliminar");
+        btnEliminar.addActionListener(this::btnEliminarActionPerformed);
 
         cbJugador.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
 
@@ -67,62 +151,11 @@ public class VistaTarjeta extends javax.swing.JInternalFrame {
         cbTarjeta.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         cbTarjeta.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Amarilla", "Roja" }));
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(cbJugador, javax.swing.GroupLayout.PREFERRED_SIZE, 470, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(minuto, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel3)
-                            .addComponent(cbTarjeta, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 350, Short.MAX_VALUE)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(btnAgregar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnEliminar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnModificar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                .addGap(81, 81, 81))
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel1)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(17, 17, 17)
-                        .addComponent(btnAgregar))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(cbJugador, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel2)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addComponent(btnModificar))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(minuto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel3)))
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(37, 37, 37)
-                        .addComponent(btnEliminar))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(cbTarjeta, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(102, Short.MAX_VALUE))
-        );
+        jLabel4.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel4.setText("Partido:");
 
-        jPanel2.setBackground(new java.awt.Color(153, 0, 51));
+        jTextField1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jTextField1.setEnabled(false);
 
         tablaTarjetas.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         tablaTarjetas.setModel(new javax.swing.table.DefaultTableModel(
@@ -136,6 +169,11 @@ public class VistaTarjeta extends javax.swing.JInternalFrame {
 
             }
         ));
+        tablaTarjetas.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tablaTarjetasMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tablaTarjetas);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -144,7 +182,7 @@ public class VistaTarjeta extends javax.swing.JInternalFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 997, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -155,23 +193,230 @@ public class VistaTarjeta extends javax.swing.JInternalFrame {
                 .addContainerGap())
         );
 
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(cbJugador, 0, 470, Short.MAX_VALUE)
+                            .addComponent(minuto, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(cbTarjeta, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jTextField1))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(btnAgregar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnEliminar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnModificar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(81, 81, 81))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(26, 26, 26)
+                .addComponent(jLabel4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(btnAgregar)
+                        .addGap(74, 74, 74)
+                        .addComponent(btnModificar))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(cbJugador, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel2)))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(minuto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(cbTarjeta, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(67, 67, 67)
+                        .addComponent(btnEliminar)))
+                .addGap(18, 18, 18)
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnAgregarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarActionPerformed
+        if (idPartidoFK == -1) {
+            JOptionPane.showMessageDialog(this, "Selecciona un Resultado desde el formulario de CapturaResultado");
+            return;
+        }
+        if (cbJugador.getSelectedIndex() == -1 || (int) minuto.getValue() <= 0 || cbTarjeta.getSelectedIndex() == -1) {
+            JOptionPane.showMessageDialog(this, "Completa todos los campos/el minuto no puede ser 0");
+            return;
+        }
+
+        long idJugador = listaJugadores.get(cbJugador.getSelectedIndex()).id;
+        int min = (int) minuto.getValue();
+        String tipoT = cbTarjeta.getSelectedItem().toString();
+
+        try {
+            TarjetaDAO dao = new TarjetaDAO();
+
+            if (dao.verificaMinuto(idPartidoFK, min) != 0) {
+                JOptionPane.showMessageDialog(this, "El minuto de la tarjeta no puede ser cero ni mayor a la hora de termino");
+                return;
+            }
+
+            if (dao.verificaMinutoDuplicado(idPartidoFK, min, 0, 0) > 0) {
+                JOptionPane.showMessageDialog(this, "Ya existe una tarjeta registrada en ese exacto minuto para este partido.");
+                return;
+            }
+
+            if (dao.verificaEstadoEnMinuto(idPartidoFK, idJugador, min, -1) == 1) {
+                JOptionPane.showMessageDialog(this, "Este jugador está Suspendido, no se le puede registrar una tarjeta");
+                return;
+            }
+
+            dao.insertarTarjeta(idJugador, idPartidoFK, min, tipoT);
+            cargarTarjetas();
+            limpiarElementos();
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }//GEN-LAST:event_btnAgregarActionPerformed
+
+    private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
+        if (idTarjetaSeleccionada == -1) {
+            JOptionPane.showMessageDialog(this, "Selecciona una Tarjeta de la tabla para modificar");
+            return;
+        }
+
+        long idPartidoAValidar = (idPartidoFK != -1) ? idPartidoFK : idPartidoSeleccionado;
+        if (idPartidoAValidar == -1 || cbJugador.getSelectedIndex() == -1 || (int) minuto.getValue() <= 0) {
+            JOptionPane.showMessageDialog(this, "Complete todos los campos");
+            return;
+        }
+
+        int fila = tablaTarjetas.getSelectedRow();
+        long idJugadorOriginal = Long.parseLong(tablaTarjetas.getValueAt(fila, 2).toString());
+        long idPartidoOriginal = Long.parseLong(tablaTarjetas.getValueAt(fila, 3).toString());
+        long idEquipoOriginal = Long.parseLong(tablaTarjetas.getValueAt(fila, 7).toString()); // EXTRAEMOS EL EQUIPO
+
+        long idJugadorNuevo = listaJugadores.get(cbJugador.getSelectedIndex()).id;
+        int min = (int) minuto.getValue();
+        String tipoT = cbTarjeta.getSelectedItem().toString();
+
+        try {
+            TarjetaDAO dao = new TarjetaDAO();
+
+            // Pasamos el tercer parámetro (idEquipoOriginal)
+            if (dao.verificaTarjetasViejas(idJugadorOriginal, idPartidoOriginal, idEquipoOriginal) == 1) {
+                JOptionPane.showMessageDialog(this, "No puedes modificar esta tarjeta. El jugador ya participó en partidos posteriores con este equipo.", "Acción Bloqueada", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (dao.verificaMinuto(idPartidoAValidar, min) != 0) {
+                JOptionPane.showMessageDialog(this, "El minuto de la tarjeta no puede ser cero ni mayor a la hora de termino");
+                return;
+            }
+
+            if (dao.verificaMinutoDuplicado(idPartidoAValidar, min, idTarjetaSeleccionada, 1) > 0) {
+                JOptionPane.showMessageDialog(this, "Ya existe una tarjeta registrada en ese exacto minuto para este partido.");
+                return;
+            }
+
+            if (dao.verificaEstadoEnMinuto(idPartidoAValidar, idJugadorNuevo, min, idTarjetaSeleccionada) == 1) {
+                JOptionPane.showMessageDialog(this, "Este jugador está Suspendido, no se le puede registrar una tarjeta");
+                return;
+            }
+
+            dao.modificarTarjeta(idTarjetaSeleccionada, idJugadorNuevo, min, tipoT);
+            cargarTarjetas();
+            limpiarElementos();
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }//GEN-LAST:event_btnModificarActionPerformed
+
+    private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
+        if (idTarjetaSeleccionada == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione una Tarjeta para eliminar");
+            return;
+        }
+
+        int fila = tablaTarjetas.getSelectedRow();
+        long idJugadorOriginal = Long.parseLong(tablaTarjetas.getValueAt(fila, 2).toString());
+        long idPartidoOriginal = Long.parseLong(tablaTarjetas.getValueAt(fila, 3).toString());
+        long idEquipoOriginal = Long.parseLong(tablaTarjetas.getValueAt(fila, 7).toString()); // EXTRAEMOS EL EQUIPO
+
+        try {
+            TarjetaDAO dao = new TarjetaDAO();
+
+            // Pasamos el tercer parámetro
+            if (dao.verificaTarjetasViejas(idJugadorOriginal, idPartidoOriginal, idEquipoOriginal) == 1) {
+                JOptionPane.showMessageDialog(this, "No puedes eliminar esta tarjeta. El jugador ya participó en partidos posteriores con este equipo.", "Acción Bloqueada", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            dao.eliminarTarjeta(idTarjetaSeleccionada);
+            cargarTarjetas();
+            limpiarElementos();
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }//GEN-LAST:event_btnEliminarActionPerformed
+
+    private void tablaTarjetasMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaTarjetasMouseClicked
+        int fila = tablaTarjetas.getSelectedRow();
+        if (fila >= 0) {
+            try {
+                idTarjetaSeleccionada = Long.parseLong(tablaTarjetas.getValueAt(fila, 0).toString());
+                long idJugadorFila = Long.parseLong(tablaTarjetas.getValueAt(fila, 2).toString());
+                idPartidoSeleccionado = Long.parseLong(tablaTarjetas.getValueAt(fila, 3).toString());
+
+                // Carga dinámica de combos al hacer clic en fila
+                jTextField1.setText(tablaTarjetas.getValueAt(fila, 5).toString());
+                cargaJugadores(idPartidoSeleccionado);
+
+                for (int i = 0; i < listaJugadores.size(); i++) {
+                    if (listaJugadores.get(i).id == idJugadorFila) {
+                        cbJugador.setSelectedIndex(i);
+                        break;
+                    }
+                }
+
+                cbTarjeta.setSelectedItem(tablaTarjetas.getValueAt(fila, 1).toString());
+                minuto.setValue(Integer.parseInt(tablaTarjetas.getValueAt(fila, 6).toString()));
+
+            } catch (Exception ex) {
+                limpiarElementos();
+            }
+        }
+    }//GEN-LAST:event_tablaTarjetasMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -183,9 +428,11 @@ public class VistaTarjeta extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextField jTextField1;
     private javax.swing.JSpinner minuto;
     private javax.swing.JTable tablaTarjetas;
     // End of variables declaration//GEN-END:variables

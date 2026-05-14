@@ -21,6 +21,7 @@ public class VistaResultadoPartido extends javax.swing.JInternalFrame {
     private long idResultadoSeleccionado = -1;
     private long idPartidoFK = -1; // El partido que nos pasan desde la otra ventana
     private long idPartidoSeleccionado = -1; // Para la modificación
+
     /**
      * Creates new form VistaResultadoPartido
      */
@@ -33,7 +34,7 @@ public class VistaResultadoPartido extends javax.swing.JInternalFrame {
     public VistaResultadoPartido(long idPartidoRecibido) {
         initComponents();
         configurarVentana();
-        
+
         this.idPartidoFK = idPartidoRecibido;
         try {
             ResultadoPartidoDAO dao = new ResultadoPartidoDAO();
@@ -65,17 +66,15 @@ public class VistaResultadoPartido extends javax.swing.JInternalFrame {
         try {
             ResultadoPartidoDAO dao = new ResultadoPartidoDAO();
             tablaPartidos.setModel(dao.obtenerModeloResultados());
-            
-            
+
             // Ocultamos IdResultado e IdPartido
             /*tablaPartidos.getColumnModel().getColumn(0).setMinWidth(0);
             tablaPartidos.getColumnModel().getColumn(0).setMaxWidth(0);
             tablaPartidos.getColumnModel().getColumn(0).setWidth(0);*/
-            
             tablaPartidos.getColumnModel().getColumn(1).setMinWidth(0);
             tablaPartidos.getColumnModel().getColumn(1).setMaxWidth(0);
             tablaPartidos.getColumnModel().getColumn(1).setWidth(0);
-            
+
             tablaPartidos.getTableHeader().setReorderingAllowed(false);
             com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaPartidos);
 
@@ -87,7 +86,7 @@ public class VistaResultadoPartido extends javax.swing.JInternalFrame {
     private void limpiarCampos() {
         idResultadoSeleccionado = -1;
         idPartidoSeleccionado = -1;
-        
+
         // Si no nos pasaron un partido, limpiamos la caja
         if (idPartidoFK == -1) {
             txtEquipo.setText("");
@@ -95,12 +94,12 @@ public class VistaResultadoPartido extends javax.swing.JInternalFrame {
 
         golesLocal.setValue(0);
         golesVisitante.setValue(0);
-        
+
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.HOUR_OF_DAY, 14); // Hora por defecto 14:00
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0); 
+        cal.set(Calendar.MILLISECOND, 0);
         horaTermino.setValue(cal.getTime());
         actualizarBotones(false);
     }
@@ -112,7 +111,7 @@ public class VistaResultadoPartido extends javax.swing.JInternalFrame {
         cal.set(Calendar.MILLISECOND, 0);
         return new java.sql.Time(cal.getTimeInMillis());
     }
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -318,7 +317,7 @@ public class VistaResultadoPartido extends javax.swing.JInternalFrame {
 
         try {
             ResultadoPartidoDAO dao = new ResultadoPartidoDAO();
-            
+
             if (dao.verificaHoraFinInicio(idPartidoFK, sqlHoraFin)) {
                 JOptionPane.showMessageDialog(this, "La hora de término no puede ser antes o igual a la de inicio del partido.", "Atención", JOptionPane.WARNING_MESSAGE);
                 return;
@@ -326,11 +325,11 @@ public class VistaResultadoPartido extends javax.swing.JInternalFrame {
 
             dao.insertarResultado(idPartidoFK, sqlHoraFin);
             cargarTabla();
-            
+
             // Ya registrado, limpiamos el FK para obligar a seleccionar otro partido nuevo
-            idPartidoFK = -1; 
+            idPartidoFK = -1;
             limpiarCampos();
-            
+
         } catch (Exception ex) {
             ManejadorErroresBD.mostrarErrorAmigable(ex);
         }
@@ -346,7 +345,7 @@ public class VistaResultadoPartido extends javax.swing.JInternalFrame {
 
         try {
             ResultadoPartidoDAO dao = new ResultadoPartidoDAO();
-            
+
             // Validamos contra el partido seleccionado de la fila
             if (dao.verificaHoraFinInicio(idPartidoSeleccionado, sqlHoraFin)) {
                 JOptionPane.showMessageDialog(this, "La hora de término no puede ser antes o igual a la de inicio del partido.", "Atención", JOptionPane.WARNING_MESSAGE);
@@ -356,7 +355,7 @@ public class VistaResultadoPartido extends javax.swing.JInternalFrame {
             dao.modificarResultado(idResultadoSeleccionado, sqlHoraFin);
             cargarTabla();
             limpiarCampos();
-            
+
         } catch (Exception ex) {
             ManejadorErroresBD.mostrarErrorAmigable(ex);
         }
@@ -383,17 +382,17 @@ public class VistaResultadoPartido extends javax.swing.JInternalFrame {
             try {
                 idResultadoSeleccionado = Long.parseLong(tablaPartidos.getValueAt(fila, 0).toString());
                 idPartidoSeleccionado = Long.parseLong(tablaPartidos.getValueAt(fila, 1).toString());
-                
+
                 txtEquipo.setText(tablaPartidos.getValueAt(fila, 2).toString());
-                
+
                 // Estos spinners están bloqueados, pero actualizamos su valor para que se vean los goles actuales
                 golesLocal.setValue(Integer.parseInt(tablaPartidos.getValueAt(fila, 3).toString()));
                 golesVisitante.setValue(Integer.parseInt(tablaPartidos.getValueAt(fila, 4).toString()));
-                
+
                 java.sql.Time horaSQL = (java.sql.Time) tablaPartidos.getValueAt(fila, 5);
-                horaTermino.setValue(new java.util.Date(horaSQL.getTime())); 
+                horaTermino.setValue(new java.util.Date(horaSQL.getTime()));
                 actualizarBotones(true);
-                
+
             } catch (Exception ex) {
                 limpiarCampos();
             }
@@ -402,34 +401,50 @@ public class VistaResultadoPartido extends javax.swing.JInternalFrame {
 
     private void btnRegGolesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegGolesActionPerformed
         VistaGol ventanaGol = new VistaGol(idPartidoSeleccionado);
-                
-                // 2. Extraes el escritorio padre
-                javax.swing.JDesktopPane escritorio = this.getDesktopPane();
-                
-                // 3. Limpias el escritorio (destruye VistaParticipante)
-                escritorio.removeAll();
-                escritorio.repaint();
-                
-                // 4. Agregas la de Jugador y la maximizas
-                escritorio.add(ventanaGol);
-                ventanaGol.setVisible(true);
-                try {
-                    ventanaGol.setMaximum(true);
-                } catch (Exception e) { }
+
+        // 2. Extraes el escritorio padre
+        javax.swing.JDesktopPane escritorio = this.getDesktopPane();
+
+        // 3. Limpias el escritorio (destruye VistaParticipante)
+        escritorio.removeAll();
+        escritorio.repaint();
+
+        // 4. Agregas la de Jugador y la maximizas
+        escritorio.add(ventanaGol);
+        ventanaGol.setVisible(true);
+        try {
+            ventanaGol.setMaximum(true);
+        } catch (Exception e) {
+        }
     }//GEN-LAST:event_btnRegGolesActionPerformed
 
     private void btnRegTarjetasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegTarjetasActionPerformed
-        // TODO add your handling code here:
+        VistaTarjeta ventanaTarjeta = new VistaTarjeta(idPartidoSeleccionado);
+
+        // 2. Extraes el escritorio padre
+        javax.swing.JDesktopPane escritorio = this.getDesktopPane();
+
+        // 3. Limpias el escritorio (destruye VistaParticipante)
+        escritorio.removeAll();
+        escritorio.repaint();
+
+        // 4. Agregas la de Jugador y la maximizas
+        escritorio.add(ventanaTarjeta);
+        ventanaTarjeta.setVisible(true);
+        try {
+            ventanaTarjeta.setMaximum(true);
+        } catch (Exception e) {
+        }
     }//GEN-LAST:event_btnRegTarjetasActionPerformed
 
     private void actualizarBotones(boolean mostrar) {
         btnRegGoles.setEnabled(mostrar);
         btnRegTarjetas.setEnabled(mostrar);
-        
+
         btnRegGoles.setVisible(mostrar);
         btnRegTarjetas.setVisible(mostrar);
     }
-    
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAgregar;
