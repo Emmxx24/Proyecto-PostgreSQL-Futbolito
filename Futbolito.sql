@@ -551,3 +551,20 @@ ALTER FUNCTION Evento.fn_tr_resultado_actualizar_estados() SECURITY DEFINER;
 ALTER FUNCTION Evento.fn_tr_prevenir_borrar_resultado() SECURITY DEFINER;
 ALTER FUNCTION Evento.fn_tr_gol_actualizar_marcador() SECURITY DEFINER;
 ALTER FUNCTION Evento.fn_tr_tarjeta_estado_jugador() SECURITY DEFINER;
+
+-- Consulta de Reporte 1
+SELECT j.IdJugador, par.NombreParticipante AS "Nombre de jugador", e.NombreEquipo AS "Nombre del equipo", 
+COUNT(g.IdGol) AS "Cantidad de goles"
+FROM Persona.Jugador j
+INNER JOIN Persona.Participante par
+ON par.IdParticipante = j.IdParticipante
+INNER JOIN Evento.Gol g
+ON g.IdJugador = j.IdJugador
+INNER JOIN Evento.Partido p
+ON p.IdPartido = g.IdPartido
+INNER JOIN Club.Equipo e
+ON e.IdEquipo = p.IdLocal OR e.IdEquipo = p.IdVisitante
+INNER JOIN Club.DetalleEquipo de
+ON de.IdJugador = j.IdJugador AND de.IdEquipo = e.IdEquipo
+WHERE e.IdEquipo = 9 --ese id cambia
+GROUP BY j.IdJugador, par.NombreParticipante, e.NombreEquipo;

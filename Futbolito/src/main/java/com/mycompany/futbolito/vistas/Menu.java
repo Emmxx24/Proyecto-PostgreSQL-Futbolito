@@ -67,6 +67,8 @@ public class Menu extends javax.swing.JFrame {
         menuClub = new javax.swing.JMenu();
         menuEquipo = new javax.swing.JMenuItem();
         menuDetalleEquipo = new javax.swing.JMenuItem();
+        menuReporte1 = new javax.swing.JMenu();
+        menuReporte2 = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -149,6 +151,22 @@ public class Menu extends javax.swing.JFrame {
 
         jMenuBar1.add(menuClub);
 
+        menuReporte1.setText("Reporte 1");
+        menuReporte1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                menuReporte1MouseClicked(evt);
+            }
+        });
+        jMenuBar1.add(menuReporte1);
+
+        menuReporte2.setText("Reporte 2");
+        menuReporte2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                menuReporte2MouseClicked(evt);
+            }
+        });
+        jMenuBar1.add(menuReporte2);
+
         setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -217,6 +235,14 @@ public class Menu extends javax.swing.JFrame {
         abrirFormularioHijo(new VistaDetalleEquipo());
     }//GEN-LAST:event_menuDetalleEquipoActionPerformed
 
+    private void menuReporte1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_menuReporte1MouseClicked
+        abrirFormularioHijo(new VistaReporte1());
+    }//GEN-LAST:event_menuReporte1MouseClicked
+
+    private void menuReporte2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_menuReporte2MouseClicked
+        abrirFormularioHijo(new VistaReporte2());
+    }//GEN-LAST:event_menuReporte2MouseClicked
+
     /**
      * @param args the command line arguments
      */
@@ -276,6 +302,8 @@ public class Menu extends javax.swing.JFrame {
     private javax.swing.JMenuItem menuParticipante;
     private javax.swing.JMenuItem menuPartido;
     private javax.swing.JMenu menuPersona;
+    private javax.swing.JMenu menuReporte1;
+    private javax.swing.JMenu menuReporte2;
     private javax.swing.JMenuItem menuResultadoPartido;
     private javax.swing.JMenuItem menuTarjeta;
     private javax.swing.JMenuItem menuTorneo;
