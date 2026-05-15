@@ -552,8 +552,130 @@ ALTER FUNCTION Evento.fn_tr_prevenir_borrar_resultado() SECURITY DEFINER;
 ALTER FUNCTION Evento.fn_tr_gol_actualizar_marcador() SECURITY DEFINER;
 ALTER FUNCTION Evento.fn_tr_tarjeta_estado_jugador() SECURITY DEFINER;
 
+-- Borrar los datos que hayan registrados para volver a ingresar datos sin borrar la bd
+TRUNCATE TABLE 
+    Persona.Participante,
+    Persona.Arbitro,
+    Persona.Jugador,
+    Juego.Lugar,
+    Juego.Torneo,
+    Juego.Jornada,
+    Juego.DetalleTorneo,
+    Club.Equipo,
+    Club.DetalleEquipo,
+    Evento.Partido,
+    Evento.ResultadoPartido,
+    Evento.Gol,
+    Evento.Tarjeta
+RESTART IDENTITY CASCADE;
+
+-- DATOS DE PRUEBA
+-- =========================================================
+-- 1. LUGARES (Requerido para poder crear partidos)
+-- =========================================================
+INSERT INTO Juego.Lugar (Nombre, Ubicacion, Capacidad) VALUES 
+('Estadio Universitario', 'Zona Universitaria', 1500),
+('Cancha Principal FI', 'Facultad de Ingeniería', 1200);
+
+-- =========================================================
+-- 2. PARTICIPANTES (2 Árbitros + 16 Jugadores - 1 Mujer por equipo)
+-- =========================================================
+-- Árbitros (IDs 1 y 2)
+INSERT INTO Persona.Participante (NombreParticipante, Genero, Telefono, CorreoElectronico, FechaNacimiento) VALUES 
+('Arturo Brizio', 'Masculino', '4441112233', 'arturo.b@arbitros.com', '1985-05-10'),
+('Marco Rodríguez', 'Masculino', '4442223344', 'marco.r@arbitros.com', '1988-08-15'),
+
+-- Jugadores Equipo 1 (IDs 3 al 6) -> 1 Mujer (ID 6)
+('Carlos Martínez', 'Masculino', '4443334455', 'carlos.m@mail.com', '2001-02-20'),
+('David López', 'Masculino', '4444445566', 'david.l@mail.com', '2002-03-25'),
+('Eduardo Gómez', 'Masculino', '4445556677', 'eduardo.g@mail.com', '2000-11-05'),
+('Fernanda Ruiz', 'Femenino', '4446667788', 'fernanda.r@mail.com', '2003-01-15'),
+
+-- Jugadores Equipo 2 (IDs 7 al 10) -> 1 Mujer (ID 10)
+('Gerardo Silva', 'Masculino', '4447778899', 'gerardo.s@mail.com', '2001-07-10'),
+('Hugo Castro', 'Masculino', '4448889900', 'hugo.c@mail.com', '2000-09-30'),
+('Ignacio Vega', 'Masculino', '4449990011', 'ignacio.v@mail.com', '2002-12-12'),
+('Jessica Ortiz', 'Femenino', '4440001122', 'jessica.o@mail.com', '2001-04-18'),
+
+-- Jugadores Equipo 3 (IDs 11 al 14) -> 1 Mujer (ID 14)
+('Kevin Nava', 'Masculino', '4441234567', 'kevin.n@mail.com', '2003-05-22'),
+('Luis Peña', 'Masculino', '4442345678', 'luis.p@mail.com', '2000-08-08'),
+('Mario Luna', 'Masculino', '4443456789', 'mario.l@mail.com', '2001-10-14'),
+('Natalia Ríos', 'Femenino', '4444567890', 'natalia.r@mail.com', '2002-06-28'),
+
+-- Jugadores Equipo 4 (IDs 15 al 18) -> 1 Mujer (ID 18)
+('Omar Cruz', 'Masculino', '4445678901', 'omar.c@mail.com', '2001-01-09'),
+('Pablo Díaz', 'Masculino', '4446789012', 'pablo.d@mail.com', '2000-04-03'),
+('Quintín Mora', 'Masculino', '4447890123', 'quintin.m@mail.com', '2003-11-19'),
+('Raquel Salas', 'Femenino', '4448901234', 'raquel.s@mail.com', '2002-09-07');
+
+-- =========================================================
+-- 3. ASIGNACIÓN DE ROLES (Árbitros y Jugadores)
+-- =========================================================
+INSERT INTO Persona.Arbitro (IdParticipante, CedulaArbitro) VALUES 
+(1, 'ARB-001-MX'),
+(2, 'ARB-002-MX');
+
+-- Cuidando la restricción CHK_JUGADOR_POSICION
+INSERT INTO Persona.Jugador (IdParticipante, Posicion, Numero, TipoSangre) VALUES 
+-- Eq 1
+(3, 'Portero', 1, 'O+'), (4, 'Defensa', 4, 'A+'), (5, 'Medio', 8, 'B+'), (6, 'Delantero', 9, 'O-'),
+-- Eq 2
+(7, 'Portero', 1, 'A-'), (8, 'Defensa', 3, 'O+'), (9, 'Medio', 10, 'O+'), (10, 'Delantero', 11, 'AB+'),
+-- Eq 3
+(11, 'Portero', 1, 'B-'), (12, 'Defensa', 2, 'O+'), (13, 'Medio', 6, 'A+'), (14, 'Delantero', 7, 'O+'),
+-- Eq 4
+(15, 'Portero', 12, 'O+'), (16, 'Defensa', 5, 'AB-'), (17, 'Medio', 14, 'O+'), (18, 'Delantero', 19, 'A+');
+
+-- =========================================================
+-- 4. TORNEO Y EQUIPOS
+-- =========================================================
+INSERT INTO Juego.Torneo (NombreTorneo, EdadMin, EdadMax, Genero, FechaInicio, FechaFin) VALUES 
+('Torneo Futbolito Universitario', 18, 50, 'Masculino', '2026-06-01', '2026-07-30');
+
+INSERT INTO Club.Equipo (NombreEquipo, Logo) VALUES 
+('Ingeniería FC', 'a'),
+('Sistemas United', 'a'),
+('Deportivo Centro', 'a'),
+('Los del Fondo', 'a');
+
+-- =========================================================
+-- 5. ASIGNAR JUGADORES A EQUIPOS (Dispara TR_DETALLEEQUIPO_CANTIDAD)
+-- =========================================================
+INSERT INTO Club.DetalleEquipo (IdEquipo, IdJugador) VALUES 
+(1, 1), (1, 2), (1, 3), (1, 4),        -- Ingeniería FC
+(2, 5), (2, 6), (2, 7), (2, 8),        -- Sistemas United
+(3, 9), (3, 10), (3, 11), (3, 12),     -- Deportivo Centro
+(4, 13), (4, 14), (4, 15), (4, 16);    -- Los del Fondo
+
+-- =========================================================
+-- 6. INSCRIBIR EQUIPOS AL TORNEO (Dispara TR_ActualizarTorneo)
+-- =========================================================
+INSERT INTO Juego.DetalleTorneo (IdTorneo, IdEquipo) VALUES 
+(1, 1), (1, 2), (1, 3), (1, 4);
+
+-- =========================================================
+-- 7. PARTIDOS (Round Robin - Todos contra todos)
+-- =========================================================
+-- Jornada 1 (IdJornada = 1)
+INSERT INTO Evento.Partido (IdArbitro, IdJornada, IdLugar, IdLocal, IdVisitante, Fecha, HoraInicio) VALUES 
+(1, 1, 1, 1, 4, '2026-06-05', '16:00:00'), -- Ingeniería FC vs Los del Fondo
+(2, 1, 2, 2, 3, '2026-06-05', '18:00:00'); -- Sistemas United vs Deportivo Centro
+
+-- Jornada 2 (IdJornada = 2)
+INSERT INTO Evento.Partido (IdArbitro, IdJornada, IdLugar, IdLocal, IdVisitante, Fecha, HoraInicio) VALUES 
+(2, 2, 1, 1, 3, '2026-06-12', '16:00:00'), -- Ingeniería FC vs Deportivo Centro
+(1, 2, 2, 4, 2, '2026-06-12', '18:00:00'); -- Los del Fondo vs Sistemas United
+
+-- Jornada 3 (IdJornada = 3)
+INSERT INTO Evento.Partido (IdArbitro, IdJornada, IdLugar, IdLocal, IdVisitante, Fecha, HoraInicio) VALUES 
+(1, 3, 2, 1, 2, '2026-06-19', '16:00:00'), -- Ingeniería FC vs Sistemas United
+(2, 3, 1, 3, 4, '2026-06-19', '18:00:00'); -- Deportivo Centro vs Los del Fondo
+
+
+
 -- Consulta de Reporte 1
-SELECT j.IdJugador, par.NombreParticipante AS "Nombre de jugador", e.NombreEquipo AS "Nombre del equipo", 
+/*SELECT j.IdJugador, par.NombreParticipante AS "Nombre de jugador", e.NombreEquipo AS "Nombre del equipo", 
 COUNT(g.IdGol) AS "Cantidad de goles"
 FROM Persona.Jugador j
 INNER JOIN Persona.Participante par
@@ -567,4 +689,4 @@ ON e.IdEquipo = p.IdLocal OR e.IdEquipo = p.IdVisitante
 INNER JOIN Club.DetalleEquipo de
 ON de.IdJugador = j.IdJugador AND de.IdEquipo = e.IdEquipo
 WHERE e.IdEquipo = 9 --ese id cambia
-GROUP BY j.IdJugador, par.NombreParticipante, e.NombreEquipo;
+GROUP BY j.IdJugador, par.NombreParticipante, e.NombreEquipo;*/
