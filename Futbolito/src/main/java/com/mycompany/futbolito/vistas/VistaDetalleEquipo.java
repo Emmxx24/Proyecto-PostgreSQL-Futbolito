@@ -27,7 +27,7 @@ public class VistaDetalleEquipo extends javax.swing.JInternalFrame {
 
     public VistaDetalleEquipo() {
         initComponents();
-        tablaDetalleEquipo.setRowHeight(30);
+        //tablaDetalleEquipo.setRowHeight(30);
         
         cargarCombos();
         cargarTabla();
@@ -61,7 +61,7 @@ public class VistaDetalleEquipo extends javax.swing.JInternalFrame {
         try {
             DetalleEquipoDAO dao = new DetalleEquipoDAO();
             tablaDetalleEquipo.setModel(dao.obtenerModeloDetalleEquipo());
-            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaDetalleEquipo);
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarTodo(tablaDetalleEquipo);
             
             // Ocultamos solo las columnas de los IDs
             tablaDetalleEquipo.getColumnModel().getColumn(0).setMinWidth(0);

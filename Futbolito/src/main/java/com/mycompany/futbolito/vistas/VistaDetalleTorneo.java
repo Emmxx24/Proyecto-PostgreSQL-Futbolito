@@ -29,7 +29,7 @@ public class VistaDetalleTorneo extends javax.swing.JInternalFrame {
     public VistaDetalleTorneo() {
         initComponents();
         
-        tablaDetalleTorneo.setRowHeight(30);
+        //tablaDetalleTorneo.setRowHeight(30);
         
         cargarCombos();
         cargarTabla();
@@ -68,7 +68,7 @@ public class VistaDetalleTorneo extends javax.swing.JInternalFrame {
             DetalleTorneoDAO dao = new DetalleTorneoDAO();
             tablaDetalleTorneo.setModel(dao.obtenerModeloDetalleTorneo());
             
-            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaDetalleTorneo);
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarTodo(tablaDetalleTorneo);
             
             // Ocultar las columnas técnicas tal como en tu C#
             int[] columnasOcultas = {0, 1, 4, 5};

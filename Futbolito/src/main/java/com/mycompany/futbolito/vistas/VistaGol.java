@@ -27,7 +27,7 @@ public class VistaGol extends javax.swing.JInternalFrame {
 
     public VistaGol(long idPartido) {
         initComponents();
-        tablaGoles.setRowHeight(30);
+        //tablaGoles.setRowHeight(30);
         tablaGoles.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 tablaGolesMouseClicked(evt);
@@ -51,7 +51,7 @@ public class VistaGol extends javax.swing.JInternalFrame {
         try {
             GolDAO dao = new GolDAO();
             tablaGoles.setModel(dao.obtenerModeloGoles());
-            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaGoles);
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarTodo(tablaGoles);
             
             for (int i = 1; i <= 2; i++) {
                 tablaGoles.getColumnModel().getColumn(i).setMinWidth(0);

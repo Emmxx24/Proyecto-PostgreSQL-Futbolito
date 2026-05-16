@@ -65,7 +65,7 @@ public class VistaJugador extends javax.swing.JInternalFrame {
             tablaJugadores.setModel(dao.obtenerModeloJugadores());
 
             // ¡Aquí está tu función de autoajustar columnas!
-            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaJugadores);
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarTodo(tablaJugadores);
 
             // TRUCO: Ocultar la columna "IdParticipante" (Índice 0) para que no se vea
             tablaJugadores.getColumnModel().getColumn(1).setMinWidth(0);

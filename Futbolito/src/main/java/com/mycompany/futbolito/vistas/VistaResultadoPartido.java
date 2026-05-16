@@ -56,7 +56,7 @@ public class VistaResultadoPartido extends javax.swing.JInternalFrame {
         golesVisitante.setValue(0);
         golesVisitante.setEnabled(false);
 
-        tablaPartidos.setRowHeight(30);
+        //tablaPartidos.setRowHeight(30);
 
         cargarTabla();
         limpiarCampos();
@@ -76,7 +76,7 @@ public class VistaResultadoPartido extends javax.swing.JInternalFrame {
             tablaPartidos.getColumnModel().getColumn(1).setWidth(0);
 
             tablaPartidos.getTableHeader().setReorderingAllowed(false);
-            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaPartidos);
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarTodo(tablaPartidos);
 
         } catch (Exception ex) {
             ManejadorErroresBD.mostrarErrorAmigable(ex);

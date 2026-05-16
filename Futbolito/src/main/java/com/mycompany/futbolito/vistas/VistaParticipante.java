@@ -33,7 +33,7 @@ public class VistaParticipante extends javax.swing.JInternalFrame {
             tablaParticipantes.setModel(dao.obtenerModeloParticipantes());
 
             // \Ajusta las columnas automáticamente sin importar qué tabla sea
-            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaParticipantes);
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarTodo(tablaParticipantes);
 
             // Bloqueamos que el usuario ande arrastrando y desordenando las columnas
             tablaParticipantes.getTableHeader().setReorderingAllowed(false);

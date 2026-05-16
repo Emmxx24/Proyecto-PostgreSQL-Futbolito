@@ -71,8 +71,6 @@ public class VistaReporte2 extends javax.swing.JInternalFrame {
 
         setTitle("Reporte 2");
 
-        jPanel1.setBackground(new java.awt.Color(255, 51, 102));
-
         jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel1.setText("<html> <p style=\"text-align: center; justify-content: center\">Se mostrarán los jugadores de un torneo que tengan un mínimo de tarjetas (amarillas o rojas) elegidss por el usuario.</p> </html>");
 
@@ -137,9 +135,6 @@ public class VistaReporte2 extends javax.swing.JInternalFrame {
                                     .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(spinnerTarjetas)))
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(338, 338, 338)
-                                .addComponent(btnEjecutar))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGap(84, 84, 84)
                                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 603, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 86, Short.MAX_VALUE))
@@ -147,6 +142,10 @@ public class VistaReporte2 extends javax.swing.JInternalFrame {
                         .addContainerGap()
                         .addComponent(jScrollPane1)))
                 .addContainerGap())
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(btnEjecutar)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -165,9 +164,9 @@ public class VistaReporte2 extends javax.swing.JInternalFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cbTarjetas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(spinnerTarjetas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(40, 40, 40)
-                .addComponent(btnEjecutar)
                 .addGap(18, 18, 18)
+                .addComponent(btnEjecutar)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 332, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -218,9 +217,9 @@ public class VistaReporte2 extends javax.swing.JInternalFrame {
             tablaReporte2.getTableHeader().setReorderingAllowed(false);
             
             // Verificamos si la tabla regresó vacía para avisarle al usuario
-            if (tablaReporte2.getRowCount() == 0) {
+            /*if (tablaReporte2.getRowCount() == 0) {
                 JOptionPane.showMessageDialog(this, "No se encontraron jugadores que cumplan con estos criterios.", "Sin Resultados", JOptionPane.INFORMATION_MESSAGE);
-            }
+            }*/
 
         } catch (Exception ex) {
             ManejadorErroresBD.mostrarErrorAmigable(ex);

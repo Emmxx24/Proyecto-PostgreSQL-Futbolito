@@ -30,7 +30,7 @@ public class VistaTarjeta extends javax.swing.JInternalFrame {
 
     public VistaTarjeta(long idPartido) {
         initComponents();
-        tablaTarjetas.setRowHeight(30);
+        //tablaTarjetas.setRowHeight(30);
         tablaTarjetas.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 tablaTarjetasMouseClicked(evt);
@@ -56,7 +56,7 @@ public class VistaTarjeta extends javax.swing.JInternalFrame {
         try {
             TarjetaDAO dao = new TarjetaDAO();
             tablaTarjetas.setModel(dao.obtenerModeloTarjetas());
-            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaTarjetas);
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarTodo(tablaTarjetas);
 
             // Ocultar IDs (0, 2, 3, 7, 8)
             int[] ocultas = {0, 2, 3, 7, 8};

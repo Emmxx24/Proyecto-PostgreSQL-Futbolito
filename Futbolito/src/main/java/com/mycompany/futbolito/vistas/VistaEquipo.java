@@ -45,7 +45,7 @@ public class VistaEquipo extends javax.swing.JInternalFrame {
             EquipoDAO dao = new EquipoDAO();
             tablaEquipos.setModel(dao.obtenerModeloEquipos());
 
-            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaEquipos);
+            com.mycompany.futbolito.utilidades.UtilidadesVista.ajustarParaClub(tablaEquipos);
 
             // Configuramos la columna de la Imagen para que tenga un ancho de 80
             tablaEquipos.getColumnModel().getColumn(2).setPreferredWidth(80);

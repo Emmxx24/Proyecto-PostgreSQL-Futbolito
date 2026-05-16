@@ -20,7 +20,7 @@ public class VistaJornada extends javax.swing.JInternalFrame {
         initComponents();
 
         // Ajustamos la altura de las filas para consistencia visual con el resto del proyecto
-        jTable1.setRowHeight(30);
+       // jTable1.setRowHeight(30);
 
         cargarTabla();
     }
@@ -31,7 +31,7 @@ public class VistaJornada extends javax.swing.JInternalFrame {
             jTable1.setModel(dao.obtenerModeloJornadas());
 
             // Auto-ajustamos las columnas usando tu clase de utilidades
-            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(jTable1);
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarTodo(jTable1);
 
             // Ocultamos la columna técnica (IdJornada)
             jTable1.getColumnModel().getColumn(0).setMinWidth(0);

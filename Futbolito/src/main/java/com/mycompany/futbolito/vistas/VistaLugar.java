@@ -21,7 +21,7 @@ public class VistaLugar extends javax.swing.JInternalFrame {
     public VistaLugar() {
         initComponents();
         
-        tablaLugares.setRowHeight(30);
+        //tablaLugares.setRowHeight(30);
         
         cargarTabla();
         limpiarCampos();
@@ -32,7 +32,7 @@ public class VistaLugar extends javax.swing.JInternalFrame {
             LugarDAO dao = new LugarDAO();
             tablaLugares.setModel(dao.obtenerModeloLugares());
             
-            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaLugares);
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarTodo(tablaLugares);
             tablaLugares.getTableHeader().setReorderingAllowed(false);
             
         } catch (Exception ex) {

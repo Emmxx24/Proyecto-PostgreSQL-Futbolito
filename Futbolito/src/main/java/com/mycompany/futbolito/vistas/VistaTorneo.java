@@ -26,7 +26,7 @@ public class VistaTorneo extends javax.swing.JInternalFrame {
         initComponents();
 
         // Ajustamos la altura de las filas
-        tablaTorneos.setRowHeight(30);
+        //tablaTorneos.setRowHeight(30);
         cargarTabla();
         limpiarCampos();
         if (SesionGlobal.rol.equals("Capturista")) {
@@ -42,7 +42,7 @@ public class VistaTorneo extends javax.swing.JInternalFrame {
             tablaTorneos.setModel(dao.obtenerModeloTorneos());
 
             // Auto-ajustamos las columnas usando tu clase de utilidades
-            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaTorneos);
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarTodo(tablaTorneos);
             tablaTorneos.getTableHeader().setReorderingAllowed(false);
 
         } catch (Exception ex) {
