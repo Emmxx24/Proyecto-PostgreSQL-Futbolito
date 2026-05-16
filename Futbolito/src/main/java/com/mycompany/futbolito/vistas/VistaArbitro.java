@@ -29,7 +29,7 @@ public class VistaArbitro extends javax.swing.JInternalFrame {
         this.idParticipanteHeredado = id;
         cargarTabla();
         // Ajustamos la altura de las filas para que no se vea aplastado
-        tablaArbitros.setRowHeight(30);
+        //tablaArbitros.setRowHeight(30);
         if (idParticipanteHeredado != -1) {
             btnAgregar.setEnabled(true);
             cargarNombreForaneo(idParticipanteHeredado);
@@ -51,7 +51,7 @@ public class VistaArbitro extends javax.swing.JInternalFrame {
             ArbitroDAO dao = new ArbitroDAO();
             tablaArbitros.setModel(dao.obtenerModeloArbitros());
             
-            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaArbitros);
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarTodo(tablaArbitros);
             
             // Ocultamos la columna 0 (IdParticipante)
             tablaArbitros.getColumnModel().getColumn(0).setMinWidth(0);

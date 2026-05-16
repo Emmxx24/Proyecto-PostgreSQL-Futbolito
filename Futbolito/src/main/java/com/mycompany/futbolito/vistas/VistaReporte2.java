@@ -4,6 +4,12 @@
  */
 package com.mycompany.futbolito.vistas;
 
+import com.mycompany.futbolito.dao.Reporte2DAO;
+import com.mycompany.futbolito.utilidades.ManejadorErroresBD;
+import javax.swing.JOptionPane;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author emmlo
@@ -13,10 +19,35 @@ public class VistaReporte2 extends javax.swing.JInternalFrame {
     /**
      * Creates new form VistaReporte2
      */
+    // Lista para manejar los IDs de los torneos
+    private List<Reporte2DAO.ItemCombo> listaTorneos = new ArrayList<>();
+
     public VistaReporte2() {
         initComponents();
+        configurarVentana();
     }
 
+    private void configurarVentana() {
+        tablaReporte2.setRowHeight(30);
+        cargarCombos();
+    }
+
+    private void cargarCombos() {
+        try {
+            Reporte2DAO dao = new Reporte2DAO();
+            
+            // 1. Cargar combo de Torneos desde la BD
+            cbTorneos.removeAllItems();
+            listaTorneos = dao.obtenerTorneosCombo();
+            for (Reporte2DAO.ItemCombo i : listaTorneos) {
+                cbTorneos.addItem(i.texto);
+            }
+            cbTorneos.setSelectedIndex(-1); // Empieza vacío
+
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -26,23 +57,188 @@ public class VistaReporte2 extends javax.swing.JInternalFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPanel1 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        cbTorneos = new javax.swing.JComboBox<>();
+        jLabel3 = new javax.swing.JLabel();
+        cbTarjetas = new javax.swing.JComboBox<>();
+        jLabel4 = new javax.swing.JLabel();
+        spinnerTarjetas = new javax.swing.JSpinner();
+        btnEjecutar = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tablaReporte2 = new javax.swing.JTable();
+
         setTitle("Reporte 2");
+
+        jPanel1.setBackground(new java.awt.Color(255, 51, 102));
+
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel1.setText("<html> <p style=\"text-align: center; justify-content: center\">Se mostrarán los jugadores de un torneo que tengan un mínimo de tarjetas (amarillas o rojas) elegidss por el usuario.</p> </html>");
+
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel2.setText("Torneo:");
+
+        cbTorneos.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        cbTorneos.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { " " }));
+
+        jLabel3.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel3.setText("Tipo de tarjeta:");
+        jLabel3.setRequestFocusEnabled(false);
+
+        cbTarjetas.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        cbTarjetas.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Amarilla", "Roja" }));
+
+        jLabel4.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel4.setText("Cantidad de tarjetas:");
+        jLabel4.setRequestFocusEnabled(false);
+
+        spinnerTarjetas.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        spinnerTarjetas.setModel(new javax.swing.SpinnerNumberModel(1, 1, null, 1));
+
+        btnEjecutar.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        btnEjecutar.setText("Ejecutar");
+        btnEjecutar.addActionListener(this::btnEjecutarActionPerformed);
+
+        tablaReporte2.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {},
+                {},
+                {},
+                {}
+            },
+            new String [] {
+
+            }
+        ));
+        jScrollPane1.setViewportView(tablaReporte2);
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(jLabel2))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(cbTorneos, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel3)
+                                    .addComponent(cbTarjetas, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(103, 103, 103)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(spinnerTarjetas)))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(338, 338, 338)
+                                .addComponent(btnEjecutar))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(84, 84, 84)
+                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 603, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 86, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jScrollPane1)))
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cbTorneos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(jLabel4))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cbTarjetas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(spinnerTarjetas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(40, 40, 40)
+                .addComponent(btnEjecutar)
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 332, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 669, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 436, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void btnEjecutarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEjecutarActionPerformed
+        if (cbTorneos.getSelectedIndex() == -1 || cbTarjetas.getSelectedIndex() == -1) {
+            JOptionPane.showMessageDialog(this, "Por favor seleccione un Torneo y un Tipo de Tarjeta.", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // 1. Extraer ID del Torneo real desde nuestra lista
+        long idTorneoSeleccionado = listaTorneos.get(cbTorneos.getSelectedIndex()).id;
+        
+        // 2. Extraer el string del tipo de tarjeta ("Amarilla" o "Roja")
+        String tipoTarjetaSeleccionada = cbTarjetas.getSelectedItem().toString();
+        
+        // 3. Extraer el valor del spinner
+        int cantidadMinima = (int) spinnerTarjetas.getValue();
+
+        try {
+            Reporte2DAO dao = new Reporte2DAO();
+            
+            // Ejecutamos la consulta pasándole los 3 parámetros en orden
+            tablaReporte2.setModel(dao.obtenerReporte(idTorneoSeleccionado, tipoTarjetaSeleccionada, cantidadMinima));
+            
+            // Autoajustamos columnas para que se vea bonito
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaReporte2);
+            tablaReporte2.getTableHeader().setReorderingAllowed(false);
+            
+            // Verificamos si la tabla regresó vacía para avisarle al usuario
+            if (tablaReporte2.getRowCount() == 0) {
+                JOptionPane.showMessageDialog(this, "No se encontraron jugadores que cumplan con estos criterios.", "Sin Resultados", JOptionPane.INFORMATION_MESSAGE);
+            }
+
+        } catch (Exception ex) {
+            ManejadorErroresBD.mostrarErrorAmigable(ex);
+        }
+    }//GEN-LAST:event_btnEjecutarActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnEjecutar;
+    private javax.swing.JComboBox<String> cbTarjetas;
+    private javax.swing.JComboBox<String> cbTorneos;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JSpinner spinnerTarjetas;
+    private javax.swing.JTable tablaReporte2;
     // End of variables declaration//GEN-END:variables
 }

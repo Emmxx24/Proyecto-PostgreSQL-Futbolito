@@ -674,7 +674,7 @@ INSERT INTO Evento.Partido (IdArbitro, IdJornada, IdLugar, IdLocal, IdVisitante,
 
 
 
--- Consulta de Reporte 1
+-- Consulta de Reporte 1: Ver los jugadores que han anotado goles (con su cantidad) de un equipo seleccionado
 /*SELECT j.IdJugador, par.NombreParticipante AS "Nombre de jugador", e.NombreEquipo AS "Nombre del equipo", 
 COUNT(g.IdGol) AS "Cantidad de goles"
 FROM Persona.Jugador j
@@ -688,5 +688,31 @@ INNER JOIN Club.Equipo e
 ON e.IdEquipo = p.IdLocal OR e.IdEquipo = p.IdVisitante
 INNER JOIN Club.DetalleEquipo de
 ON de.IdJugador = j.IdJugador AND de.IdEquipo = e.IdEquipo
-WHERE e.IdEquipo = 9 --ese id cambia
+WHERE e.IdEquipo = ? --ese id cambia
 GROUP BY j.IdJugador, par.NombreParticipante, e.NombreEquipo;*/
+
+-- Consulta de Reporte 2: Ver los jugadores con un minimo de tarjetas y de un tipo en especifico, ambos
+-- datos seleccionados por el usuario
+/*SELECT NombreJugador AS "Nombre del jugador", NombreEquipo AS "Nombre del equipo", TotalTarjetas AS "Cantidad de tarjetas"
+FROM(
+    SELECT par.NombreParticipante AS NombreJugador, e.NombreEquipo, COUNT(tar.IdTarjeta) AS TotalTarjetas
+    FROM Persona.Participante par
+    INNER JOIN Persona.Jugador j 
+    ON j.IdParticipante = par.IdParticipante
+    INNER JOIN Evento.Tarjeta tar 
+    ON tar.IdJugador = j.IdJugador
+    INNER JOIN Evento.Partido p 
+    ON p.IdPartido = tar.IdPartido
+    INNER JOIN Juego.Jornada jor 
+    ON jor.IdJornada = p.IdJornada
+    INNER JOIN Juego.Torneo t 
+    ON t.IdTorneo = jor.IdTorneo
+    INNER JOIN Club.Equipo e 
+    ON (e.IdEquipo = p.IdLocal OR e.IdEquipo = p.IdVisitante)
+    INNER JOIN Club.DetalleEquipo de 
+    ON de.IdEquipo = e.IdEquipo AND de.IdJugador = j.IdJugador
+    WHERE t.IdTorneo = ? AND tar.TipoTarjeta = ?
+    GROUP BY j.IdJugador, par.NombreParticipante, e.NombreEquipo
+) AS Indisciplinados
+WHERE TotalTarjetas >= ?
+ORDER BY TotalTarjetas DESC;*/

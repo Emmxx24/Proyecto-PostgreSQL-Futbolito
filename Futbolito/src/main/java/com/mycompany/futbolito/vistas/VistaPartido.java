@@ -38,7 +38,7 @@ public class VistaPartido extends javax.swing.JInternalFrame {
         JSpinner.DateEditor timeEditor = new JSpinner.DateEditor(spinnerHora, "HH:mm");
         spinnerHora.setEditor(timeEditor);
 
-        tablaPartidos.setRowHeight(30);
+        //tablaPartidos.setRowHeight(30);
 
         cbJornada.addActionListener(new java.awt.event.ActionListener() {
             @Override
@@ -96,7 +96,7 @@ public class VistaPartido extends javax.swing.JInternalFrame {
                 tablaPartidos.getColumnModel().getColumn(i).setWidth(0);
             }
             tablaPartidos.getTableHeader().setReorderingAllowed(false);
-            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarColumnas(tablaPartidos);
+            com.mycompany.futbolito.utilidades.UtilidadesVista.autoAjustarTodo(tablaPartidos);
 
         } catch (Exception ex) {
             ManejadorErroresBD.mostrarErrorAmigable(ex);
