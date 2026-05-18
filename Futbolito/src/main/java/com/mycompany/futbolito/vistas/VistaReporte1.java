@@ -99,7 +99,7 @@ public class VistaReporte1 extends javax.swing.JInternalFrame {
         jLabel2.setText("Equipo:");
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jLabel1.setText("<html>      <p style=\"text-align: center; justify-content: center\">Se mostrará la cantidad de goles que ha anotado cada jugador de un equipo seleccionado, en orden de la cantidad de los goles.</p> </html>");
+        jLabel1.setText("<html>      <p style=\"text-align: center; justify-content: center\">Obtiene la cantidad de goles que ha anotado cada jugador de un equipo seleccionado en orden de la cantidad de los goles.</p> </html>");
 
         cbEquipo.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
 

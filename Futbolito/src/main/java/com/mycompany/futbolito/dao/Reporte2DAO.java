@@ -34,6 +34,7 @@ public class Reporte2DAO {
     public DefaultTableModel obtenerReporte(long idTorneo, String tipoTarjeta, int cantidadMinima) throws Exception {
         DefaultTableModel modelo = new DefaultTableModel();
         
+        modelo.addColumn("Torneo");
         modelo.addColumn("Nombre del jugador");
         modelo.addColumn("Nombre del equipo");
         modelo.addColumn("Cantidad de tarjetas");
@@ -41,9 +42,9 @@ public class Reporte2DAO {
         ClaseConexion obj = new ClaseConexion();
         Connection cn = obj.establecerConexion();
         
-        String sql = "SELECT NombreJugador AS \"Nombre del jugador\", NombreEquipo AS \"Nombre del equipo\", TotalTarjetas AS \"Cantidad de tarjetas\" " +
+        String sql = "SELECT  Torneo, NombreJugador AS \"Nombre del jugador\", NombreEquipo AS \"Nombre del equipo\", TotalTarjetas AS \"Cantidad de tarjetas\" " +
                      "FROM( " +
-                     "    SELECT par.NombreParticipante AS NombreJugador, e.NombreEquipo, COUNT(tar.IdTarjeta) AS TotalTarjetas " +
+                     "    SELECT t.NombreTorneo AS Torneo, par.NombreParticipante AS NombreJugador, e.NombreEquipo, COUNT(tar.IdTarjeta) AS TotalTarjetas " +
                      "    FROM Persona.Participante par " +
                      "    INNER JOIN Persona.Jugador j ON j.IdParticipante = par.IdParticipante " +
                      "    INNER JOIN Evento.Tarjeta tar ON tar.IdJugador = j.IdJugador " +
@@ -53,7 +54,7 @@ public class Reporte2DAO {
                      "    INNER JOIN Club.Equipo e ON (e.IdEquipo = p.IdLocal OR e.IdEquipo = p.IdVisitante) " +
                      "    INNER JOIN Club.DetalleEquipo de ON de.IdEquipo = e.IdEquipo AND de.IdJugador = j.IdJugador " +
                      "    WHERE t.IdTorneo = ? AND tar.TipoTarjeta = ? " +
-                     "    GROUP BY j.IdJugador, par.NombreParticipante, e.NombreEquipo " +
+                     "    GROUP BY t.NombreTorneo, j.IdJugador, par.NombreParticipante, e.NombreEquipo " +
                      ") AS Indisciplinados " +
                      "WHERE TotalTarjetas >= ? " +
                      "ORDER BY TotalTarjetas DESC";
@@ -67,9 +68,10 @@ public class Reporte2DAO {
 
         while (rs.next()) {
             modelo.addRow(new Object[]{
-                rs.getString(1), // Nombre del jugador
-                rs.getString(2), // Nombre del equipo
-                rs.getInt(3)     // Cantidad de tarjetas
+                rs.getString(1), //Nombre del torneo
+                rs.getString(2), // Nombre del jugador
+                rs.getString(3), // Nombre del equipo
+                rs.getInt(4)     // Cantidad de tarjetas
             });
         }
         return modelo;

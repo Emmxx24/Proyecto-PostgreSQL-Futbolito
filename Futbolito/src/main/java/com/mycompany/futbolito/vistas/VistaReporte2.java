@@ -72,7 +72,7 @@ public class VistaReporte2 extends javax.swing.JInternalFrame {
         setTitle("Reporte 2");
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jLabel1.setText("<html> <p style=\"text-align: center; justify-content: center\">Se mostrarán los jugadores de un torneo que tengan un mínimo de tarjetas (amarillas o rojas) elegidss por el usuario.</p> </html>");
+        jLabel1.setText("<html> <p style=\"text-align: center; justify-content: center\">Obtiene una lista de jugadores de un torneo seleccionado, que tenga un mínimo de tarjetas (según el tipo elegido).</p> </html>");
 
         jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel2.setText("Torneo:");
@@ -88,7 +88,7 @@ public class VistaReporte2 extends javax.swing.JInternalFrame {
         cbTarjetas.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Amarilla", "Roja" }));
 
         jLabel4.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jLabel4.setText("Cantidad de tarjetas:");
+        jLabel4.setText("Elige el mínimo de la cantidad de tarjetas:");
         jLabel4.setRequestFocusEnabled(false);
 
         spinnerTarjetas.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
@@ -131,9 +131,9 @@ public class VistaReporte2 extends javax.swing.JInternalFrame {
                                     .addComponent(jLabel3)
                                     .addComponent(cbTarjetas, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addGap(103, 103, 103)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(spinnerTarjetas)))
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel4)
+                                    .addComponent(spinnerTarjetas, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGap(84, 84, 84)
                                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 603, javax.swing.GroupLayout.PREFERRED_SIZE)))

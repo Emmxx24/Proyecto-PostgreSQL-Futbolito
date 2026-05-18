@@ -64,9 +64,9 @@
                                       <Component id="cbTarjetas" alignment="0" min="-2" pref="201" max="-2" attributes="0"/>
                                   </Group>
                                   <EmptySpace min="-2" pref="103" max="-2" attributes="0"/>
-                                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                      <Component id="jLabel4" max="32767" attributes="0"/>
-                                      <Component id="spinnerTarjetas" max="32767" attributes="0"/>
+                                  <Group type="103" groupAlignment="0" attributes="0">
+                                      <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
+                                      <Component id="spinnerTarjetas" min="-2" pref="190" max="-2" attributes="0"/>
                                   </Group>
                               </Group>
                               <Group type="102" alignment="0" attributes="0">
@@ -124,7 +124,7 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Segoe UI" size="18" style="0"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="&lt;html&gt; &lt;p style=&quot;text-align: center; justify-content: center&quot;&gt;Se mostrar&#xe1;n los jugadores de un torneo que tengan un m&#xed;nimo de tarjetas (amarillas o rojas) elegidss por el usuario.&lt;/p&gt; &lt;/html&gt;"/>
+            <Property name="text" type="java.lang.String" value="&lt;html&gt; &lt;p style=&quot;text-align: center; justify-content: center&quot;&gt;Obtiene una lista de jugadores de un torneo seleccionado, que tenga un m&#xed;nimo de tarjetas (seg&#xfa;n el tipo elegido).&lt;/p&gt; &lt;/html&gt;"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel2">
@@ -180,7 +180,7 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Segoe UI" size="18" style="0"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Cantidad de tarjetas:"/>
+            <Property name="text" type="java.lang.String" value="Elige el m&#xed;nimo de la cantidad de tarjetas:"/>
             <Property name="requestFocusEnabled" type="boolean" value="false"/>
           </Properties>
         </Component>
